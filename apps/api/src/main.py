@@ -22,6 +22,7 @@ from src.slices.feature_flags.router import router as feature_flags_router
 from src.slices.notifications.router import router as notifications_router
 from src.slices.projects.router import router as projects_router
 from src.slices.storage.router import router as storage_router
+from src.slices.themes.router import router as themes_router
 from src.slices.webhooks.router import router as webhooks_router
 from src.slices.workspaces.router import router as workspaces_router
 
@@ -74,6 +75,7 @@ app.include_router(webhooks_router, prefix=settings.API_V1_STR)
 app.include_router(apikeys_router, prefix=settings.API_V1_STR)
 app.include_router(storage_router, prefix=settings.API_V1_STR)
 app.include_router(feature_flags_router, prefix=settings.API_V1_STR)
+app.include_router(themes_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Sistema"])

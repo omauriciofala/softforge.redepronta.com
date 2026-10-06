@@ -1,0 +1,110 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SoftForgeThemeManifest",
+  "description": "Especificação declarativa universal de temas para o SoftForge",
+  "type": "object",
+  "required": [
+    "name",
+    "slug",
+    "version",
+    "engine"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Nome de exibição amigável do tema"
+    },
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Identificador único em formato kebab-case"
+    },
+    "version": {
+      "type": "string",
+      "description": "Versão semântica (ex: 1.0.0)"
+    },
+    "engine": {
+      "type": "string",
+      "enum": [
+        "react",
+        "vue",
+        "html-bootstrap",
+        "php",
+        "svelte",
+        "other"
+      ],
+      "description": "Motor visual ou framework do tema"
+    },
+    "author": {
+      "type": "string",
+      "description": "Autor ou organização mantenedora"
+    },
+    "description": {
+      "type": "string",
+      "description": "Breve descrição do propósito e estética do tema"
+    },
+    "homepage": {
+      "type": "string",
+      "description": "URL de documentação ou repositório do tema"
+    },
+    "preview_image": {
+      "type": "string",
+      "description": "Caminho relativo para imagem de prévia (ex: assets/preview.png)"
+    },
+    "tokens": {
+      "type": "object",
+      "description": "Design Tokens Universais que mapeiam para variáveis CSS (--sf-*)",
+      "properties": {
+        "colors": {
+          "type": "object",
+          "properties": {
+            "primary": { "type": "string" },
+            "primary_foreground": { "type": "string" },
+            "background": { "type": "string" },
+            "foreground": { "type": "string" },
+            "card": { "type": "string" },
+            "card_foreground": { "type": "string" },
+            "border": { "type": "string" },
+            "muted": { "type": "string" },
+            "muted_foreground": { "type": "string" },
+            "accent": { "type": "string" }
+          },
+          "additionalProperties": { "type": "string" }
+        },
+        "typography": {
+          "type": "object",
+          "properties": {
+            "font_family": { "type": "string" },
+            "font_size_base": { "type": "string" },
+            "line_height": { "type": "string" }
+          },
+          "additionalProperties": { "type": "string" }
+        },
+        "geometry": {
+          "type": "object",
+          "properties": {
+            "border_radius": { "type": "string" }
+          },
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "assets": {
+      "type": "object",
+      "properties": {
+        "stylesheets": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "scripts": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

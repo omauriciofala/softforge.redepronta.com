@@ -1,0 +1,39 @@
+{
+  "$schema": "../theme-schema.json",
+  "name": "SoftForge Default React",
+  "slug": "default-react",
+  "version": "0.1.0",
+  "engine": "react",
+  "author": "SoftForge Core Team",
+  "description": "Tema padrão oficial em React 18, Vite, Tailwind CSS e componentes acessíveis Shadcn/UI.",
+  "tokens": {
+    "colors": {
+      "primary": "#2563eb",
+      "primary_foreground": "#f8fafc",
+      "background": "#ffffff",
+      "foreground": "#0f172a",
+      "card": "#ffffff",
+      "card_foreground": "#0f172a",
+      "border": "#e2e8f0",
+      "muted": "#f1f5f9",
+      "muted_foreground": "#64748b",
+      "accent": "#f1f5f9"
+    },
+    "typography": {
+      "font_family": "Inter, system-ui, -apple-system, sans-serif",
+      "font_size_base": "16px",
+      "line_height": "1.5"
+    },
+    "geometry": {
+      "border_radius": "0.5rem"
+    }
+  },
+  "assets": {
+    "stylesheets": [
+      "/src/index.css"
+    ],
+    "scripts": [
+      "/src/main.tsx"
+    ]
+  }
+}

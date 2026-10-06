@@ -130,5 +130,6 @@ Tokens are injected into the HTML `:root` element for immediate use across diffe
 | Method | Endpoint | Minimum Role | Description |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/system/themes` | Public / Authenticated | Lists all themes and frontend engines installed in `themes/`. |
+| `GET` | `/api/v1/system/themes/{slug}` | Public / Authenticated | Returns full manifest and design tokens for the specified theme slug. |
 | `GET` | `/api/v1/workspaces/{id}/theme` | Viewer | Returns evaluated theme and branding variables for this workspace. |
 | `PATCH`| `/api/v1/workspaces/{id}/theme` | Admin | Updates custom logo, primary color, active theme, or custom CSS. |

@@ -61,6 +61,9 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY_ID: str = ""
     S3_SECRET_ACCESS_KEY: str = ""
 
+    # Temas & Multi-Frontends
+    THEMES_DIR: str = "themes"
+
     # Logging
     LOG_LEVEL: str = "DEBUG"
     LOG_FORMAT: Literal["colored", "json"] = "colored"

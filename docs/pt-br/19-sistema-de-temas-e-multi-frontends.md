@@ -130,5 +130,6 @@ O SoftForge injeta os tokens no elemento raiz (`:root`) do HTML, permitindo reut
 | Método | Endpoint | Papel Mínimo | Descrição |
 | :--- | :--- | :--- | :--- |
 | `GET` | `/api/v1/system/themes` | Público / Autenticado | Lista todos os temas e engines instalados no diretório `themes/`. |
+| `GET` | `/api/v1/system/themes/{slug}` | Público / Autenticado | Retorna o manifesto completo e tokens do tema indicado pelo slug. |
 | `GET` | `/api/v1/workspaces/{id}/theme` | Viewer | Retorna as variáveis de tema e branding consolidadas do workspace. |
 | `PATCH`| `/api/v1/workspaces/{id}/theme` | Admin | Altera logo customizada, cor primária, tema ativo ou CSS customizado. |

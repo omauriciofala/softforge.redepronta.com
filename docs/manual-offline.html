@@ -604,6 +604,7 @@ Accept-Language: pt-BR,pt;q=0.9                    -> Solicita respostas em port
           <li><strong>White-Labeling por Workspace:</strong> Customização de cor primária, logotipo e CSS personalizado por tenant com resposta em tempo real.</li>
         </ul>
         <pre><code>GET    /api/v1/system/themes                        -> Lista catálogo de temas instalados
+GET    /api/v1/system/themes/{slug}                 -> Retorna manifesto e tokens do tema
 GET    /api/v1/workspaces/{id}/theme                -> Retorna variáveis e branding do tenant
 PATCH  /api/v1/workspaces/{id}/theme                -> Customiza branding do workspace (White-label)</code></pre>
       </section>

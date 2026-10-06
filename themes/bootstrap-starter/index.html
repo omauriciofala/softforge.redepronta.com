@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoftForge — Bootstrap Starter Theme</title>
+  <!-- Bootstrap 5.3 CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  
+  <!-- Injeção dos Design Tokens Universais do SoftForge (--sf-*) -->
+  <style id="sf-tokens-style">
+    :root {
+      --sf-color-primary: #4f46e5;
+      --sf-color-primary-foreground: #ffffff;
+      --sf-color-bg: #f8fafc;
+      --sf-color-text: #0f172a;
+      --sf-color-card: #ffffff;
+      --sf-color-border: #dee2e6;
+      --sf-radius: 0.375rem;
+
+      /* Mapeamento para Variáveis Nativas do Bootstrap 5 */
+      --bs-primary: var(--sf-color-primary);
+      --bs-primary-rgb: 79, 70, 229;
+      --bs-body-bg: var(--sf-color-bg);
+      --bs-body-color: var(--sf-color-text);
+      --bs-border-radius: var(--sf-radius);
+      --bs-border-color: var(--sf-color-border);
+    }
+
+    body {
+      background-color: var(--bs-body-bg);
+      color: var(--bs-body-color);
+      min-height: 100vh;
+    }
+
+    .card {
+      background-color: var(--sf-color-card);
+      border-radius: var(--sf-radius);
+      border-color: var(--sf-color-border);
+    }
+
+    .btn-primary {
+      background-color: var(--sf-color-primary);
+      border-color: var(--sf-color-primary);
+      color: var(--sf-color-primary-foreground);
+    }
+
+    .sf-badge-engine {
+      background-color: rgba(79, 70, 229, 0.1);
+      color: var(--sf-color-primary);
+      border: 1px solid var(--sf-color-primary);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 py-2 shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+        <span id="brand-logo" class="badge bg-primary fs-6">SF</span>
+        <span id="brand-name" class="fw-bold">SoftForge</span>
+        <span class="badge sf-badge-engine ms-2">Bootstrap 5 Theme</span>
+      </a>
+      <div class="d-flex align-items-center gap-3">
+        <span id="api-status-badge" class="badge bg-secondary">API: Verificando...</span>
+        <span id="workspace-name-display" class="text-light small">Workspace: Default</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Container Principal -->
+  <main class="container my-5">
+    <div class="row g-4">
+      <!-- Coluna Esquerda: Informações do Tema e White-Labeling -->
+      <div class="col-lg-4">
+        <div class="card shadow-sm p-4 mb-4">
+          <h5 class="card-title fw-bold text-primary mb-3">🎨 Motor Visual Bootstrap</h5>
+          <p class="text-muted small">
+            Este tema consome a mesma API e contratos OpenAPI 3.1 do SoftForge utilizando HTML5 clássico, Bootstrap 5 e Vanilla JavaScript.
+          </p>
+          <hr>
+          <h6 class="fw-bold small text-uppercase text-secondary mb-2">Tokens Universais Ativos</h6>
+          <ul class="list-group list-group-flush small" id="tokens-debug-list">
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span>--sf-color-primary:</span>
+              <code id="val-color-primary">#4f46e5</code>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span>--sf-radius:</span>
+              <code id="val-radius">0.375rem</code>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span>--sf-color-bg:</span>
+              <code id="val-color-bg">#f8fafc</code>
+            </li>
+          </ul>
+        </div>
+
+        <div class="card shadow-sm p-4">
+          <h6 class="fw-bold mb-3">Testar White-Labeling Dinâmico</h6>
+          <div class="mb-3">
+            <label for="input-primary-color" class="form-label small">Cor Primária do Tenant:</label>
+            <input type="color" class="form-control form-control-color w-100" id="input-primary-color" value="#4f46e5">
+          </div>
+          <div class="mb-3">
+            <label for="input-radius" class="form-label small">Raio de Borda:</label>
+            <select class="form-select form-select-sm" id="input-radius">
+              <option value="0rem">0px (Sharp)</option>
+              <option value="0.375rem" selected>6px (Padrão)</option>
+              <option value="0.75rem">12px (Arredondado)</option>
+              <option value="1.5rem">24px (Pill)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary w-100 btn-sm" id="btn-apply-tokens">Aplicar Tokens Localmente</button>
+        </div>
+      </div>
+
+      <!-- Coluna Direita: Dados ao Vivo da API -->
+      <div class="col-lg-8">
+        <div class="card shadow-sm p-4 mb-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="card-title fw-bold mb-0">Temas Disponíveis no Framework</h5>
+            <button class="btn btn-sm btn-outline-primary" id="btn-refresh-themes">Atualizar Lista</button>
+          </div>
+          <p class="text-muted small">
+            Lista de temas detectados dinamicamente em <code>themes/</code> pelo endpoint <code>GET /api/v1/system/themes</code>.
+          </p>
+          <div class="table-responsive">
+            <table class="table table-hover align-middle small" id="themes-table">
+              <thead class="table-light">
+                <tr>
+                  <th>Nome</th>
+                  <th>Slug</th>
+                  <th>Engine</th>
+                  <th>Versão</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="themes-table-body">
+                <tr>
+                  <td colspan="5" class="text-center text-muted py-3">Carregando catálogo de temas...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Card de Monitoramento da API -->
+        <div class="card shadow-sm p-4">
+          <h5 class="card-title fw-bold mb-2">Conectividade & OpenAPI</h5>
+          <p class="text-muted small mb-3">
+            O tema pode consumir qualquer rota protegida ou pública. As credenciais de sessão (JWT em cookies HttpOnly ou Bearer token) são enviadas transparentemente.
+          </p>
+          <div class="d-flex gap-2">
+            <a href="http://localhost:8000/docs" target="_blank" class="btn btn-sm btn-outline-secondary">Abrir Swagger API (/docs)</a>
+            <a href="http://localhost:8000/api/v1/openapi.json" target="_blank" class="btn btn-sm btn-outline-secondary">Ver OpenAPI JSON</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bootstrap 5.3 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Script do Tema SoftForge -->
+  <script src="./app.js"></script>
+</body>
+</html>
