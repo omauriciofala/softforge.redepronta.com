@@ -69,3 +69,12 @@ SoftForge was built on a single architectural principle: **every technology must
 2. **`tools/scripts/export_openapi.py`:** Generates OpenAPI 3.1 schema definitions.
 3. **`tools/scripts/migrate.py`:** Unified Alembic migration runner (`makemigrations`, `upgrade`, `downgrade`, `sql`) with auto-discovery of slice models.
 4. **`tools/scripts/verify.py`:** Quality gatekeeper running linters, migration validations, and tests before any task completion.
+
+---
+
+## 5. CI/CD & GitHub Actions Automation
+
+| Component | Configuration | Purpose |
+| :--- | :--- | :--- |
+| **Quality Gate Workflow** | `.github/workflows/ci.yml` | Triggered on every `push` and `pull_request` targeting `main`. Executes `tools/scripts/verify.py` covering tests, linters, migration validations, and frontend typechecking. |
+| **Automated Docs Deployment** | Job `deploy-docs` | Builds VitePress and automatically deploys the static documentation to **GitHub Pages** under the custom domain `softforge.redepronta.com`. |

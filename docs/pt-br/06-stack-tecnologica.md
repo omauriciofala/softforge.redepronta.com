@@ -98,3 +98,12 @@ Ferramentas nativas do repositório para garantir que qualquer IA (Cursor, Antig
 | **VitePress** | `docs/` | Gerador de documentação estática bilíngue com suporte a tema escuro/claro e motor de busca local (*minisearch*). |
 | **`docs.bat` / `docs.ps1`** | Raiz (`/`) | Scripts de inicialização rápida que servem os arquivos estáticos pré-compilados em `http://localhost:5174`. |
 | **`manual-offline.html`** | `docs/` | Manual zero-dependências com CSS 100% inlined. Funciona diretamente com duplo clique via `file:///`. |
+
+---
+
+## 7. CI/CD & Automação GitHub Actions
+
+| Componente | Configuração | Finalidade |
+| :--- | :--- | :--- |
+| **Workflow de Qualidade** | `.github/workflows/ci.yml` | Disparado a cada `push` e `pull_request` na branch `main`. Executa o `tools/scripts/verify.py` cobrindo 100% dos testes assíncronos, Ruff, validação de migrações e typecheck do React. |
+| **Deploy de Documentação** | Job `deploy-docs` no Actions | Compila o VitePress e publica automaticamente a documentação no **GitHub Pages** sob o domínio personalizado `softforge.redepronta.com`. |
