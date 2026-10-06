@@ -4,7 +4,7 @@ $ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $DocsDir = Join-Path $ScriptDir "docs"
 
 Write-Host "======================================================" -ForegroundColor Cyan
-Write-Host "   SoftForge - Servidor de Documentacao Offline" -ForegroundColor Cyan
+Write-Host "   SoftForge - Servidor de Documentacao Offline (HTML)" -ForegroundColor Cyan
 Write-Host "======================================================" -ForegroundColor Cyan
 Write-Host ""
 
@@ -15,8 +15,13 @@ if (-not (Test-Path "node_modules")) {
     npm.cmd install
 }
 
-Write-Host "[*] Abrindo documentacao no navegador: http://localhost:5174" -ForegroundColor Green
+if (-not (Test-Path ".vitepress\dist")) {
+    Write-Host "[*] Gerando arquivos HTML estaticos com VitePress..." -ForegroundColor Yellow
+    npx.cmd vitepress build
+}
+
+Write-Host "[*] Abrindo documentacao em: http://localhost:5174" -ForegroundColor Green
 Start-Process "http://localhost:5174"
 
-Write-Host "[*] Iniciando servidor VitePress..." -ForegroundColor Green
-npx.cmd vitepress dev --port 5174
+Write-Host "[*] Servindo arquivos HTML estaticos da pasta .vitepress\dist..." -ForegroundColor Green
+npx.cmd vitepress preview --port 5174
