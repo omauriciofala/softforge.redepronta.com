@@ -230,7 +230,8 @@
       <a href="#i18n">18. Internacionalização (i18n)</a>
       <a href="#temas">19. Sistema de Temas & Multi-Frontends</a>
       <a href="#dashboard">20. Interface & Dashboard Frontend</a>
-      <a href="#faq">21. FAQ & Troubleshooting</a>
+      <a href="#versionamento">21. Política de Versionamento (SemVer)</a>
+      <a href="#faq">22. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -643,6 +644,30 @@ PATCH  /api/v1/workspaces/{id}/theme                -> Customiza branding do wor
           <li><strong>Storage & Arquivos:</strong> Upload drag-and-drop/seletor, formatação automática em KB/MB e downloads públicos/privados.</li>
           <li><strong>Temas & White-labeling:</strong> Catálogo de temas instalados, color picker em tempo real com injeção de tokens no <code>:root</code>, logotipo do tenant e editor de CSS.</li>
         </ul>
+      </section>
+
+      <hr>
+
+      <section id="versionamento">
+        <h1>Política de Versionamento & Releases (SemVer)</h1>
+        <blockquote>
+          <strong>Modelo SemVer Híbrido:</strong> <code>main</code> rolling contínuo sempre verde + Releases formais <code>vX.Y.Z</code> no GitHub com CHANGELOG automatizado.
+        </blockquote>
+
+        <h2>1. Escopo Global Unificado no Monorepo</h2>
+        <p>O SoftForge avança sob um número de versão unificado. O Backend (<code>apps/api</code>), o Frontend (<code>apps/web</code>), os Temas (<code>themes/</code>), as Skills de IA e os manuais compartilham a mesma versão global (atualmente <strong>v1.0.0 — General Availability</strong>).</p>
+
+        <h2>2. Estrutura SemVer 2.0.0 (MAJOR.MINOR.PATCH)</h2>
+        <ul>
+          <li><strong>MAJOR (vX.0.0):</strong> Mudanças incompatíveis em schemas OpenAPI, alterações destrutivas no banco ou reestruturações do core. Exige migrações Alembic reversíveis e guia no CHANGELOG.</li>
+          <li><strong>MINOR (v1.X.0):</strong> Novas fatias verticais retrocompatíveis, novos endpoints, novos temas no catálogo e novas skills de IA.</li>
+          <li><strong>PATCH (v1.0.X):</strong> Correções de bugs em services/rotas, correções de estilos, patches de segurança em dependências e melhorias em documentação.</li>
+        </ul>
+
+        <h2>3. Automação de Release com <code>release.py</code></h2>
+        <p>Lançamentos formais são orquestrados deterministicamente pelo script CLI integrado aos guardrails:</p>
+        <pre><code>python tools/scripts/release.py --bump minor --tag -m "Nome da Release"</code></pre>
+        <p>O script roda <code>verify.py</code> (OpenAPI, Pytest, Alembic SQL, Ruff, TypeScript), sincroniza <code>pyproject.toml</code> e <code>package.json</code>, atualiza o <code>CHANGELOG.md</code> e gera a tag Git anotada.</p>
       </section>
 
       <hr>

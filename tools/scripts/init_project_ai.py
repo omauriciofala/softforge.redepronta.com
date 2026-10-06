@@ -25,7 +25,9 @@ def sync_ai_guidelines(target_dir: Path) -> None:
     items_to_sync = [
         (".agents/skills/karpathy-guidelines/SKILL.md", target_dir / ".agents" / "skills" / "karpathy-guidelines" / "SKILL.md"),
         (".agents/rules/karpathy-guidelines.md", target_dir / ".agents" / "rules" / "karpathy-guidelines.md"),
+        (".agents/rules/versioning-policy.md", target_dir / ".agents" / "rules" / "versioning-policy.md"),
         (".ai/rules/karpathy-guidelines.md", target_dir / ".ai" / "rules" / "karpathy-guidelines.md"),
+        (".ai/rules/versioning-policy.md", target_dir / ".ai" / "rules" / "versioning-policy.md"),
         (".ai/rules/documentation-first.md", target_dir / ".ai" / "rules" / "documentation-first.md"),
         (".ai/rules/openapi-contracts.md", target_dir / ".ai" / "rules" / "openapi-contracts.md"),
         (".ai/rules/vertical-slices.md", target_dir / ".ai" / "rules" / "vertical-slices.md"),
