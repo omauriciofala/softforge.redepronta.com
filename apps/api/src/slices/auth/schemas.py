@@ -41,6 +41,25 @@ class UserResponse(BaseModel):
     id: uuid.UUID
     email: EmailStr
     full_name: str
+    avatar_url: str | None = None
     is_active: bool
     is_superuser: bool
     created_at: datetime
+
+
+class OAuthAuthorizeResponse(BaseModel):
+    """Schema de resposta para início do fluxo OAuth2."""
+
+    authorization_url: str = Field(..., description="URL de redirecionamento para login no provedor")
+    state: str = Field(..., description="Token de proteção contra CSRF")
+    provider: str = Field(..., description="Nome do provedor (google, github)")
+
+
+class OAuthCallbackResponse(BaseModel):
+    """Schema retornado após autenticação social bem-sucedida."""
+
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+    is_new_user: bool = Field(..., description="Indica se uma nova conta foi criada ou se foi vinculada")

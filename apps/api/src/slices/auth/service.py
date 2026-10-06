@@ -13,7 +13,8 @@ from src.core.security import (
     get_password_hash,
     verify_password,
 )
-from src.slices.auth.models import RefreshToken, User
+from src.slices.auth.models import OAuthAccount, RefreshToken, User
+from src.slices.auth.oauth import OAuthUserInfo
 from src.slices.auth.schemas import (
     TokenResponse,
     UserLoginRequest,
@@ -61,7 +62,7 @@ async def authenticate_user(session: AsyncSession, req: UserLoginRequest) -> Use
     if not user:
         raise UnauthorizedException(message="Credenciais de acesso inválidas")
 
-    if not verify_password(req.password, user.hashed_password):
+    if not user.hashed_password or not verify_password(req.password, user.hashed_password):
         raise UnauthorizedException(message="Credenciais de acesso inválidas")
 
     if not user.is_active:
@@ -90,6 +91,66 @@ async def create_tokens_for_user(session: AsyncSession, user: User) -> TokenResp
         refresh_token=refresh_token,
         token_type="bearer",
     )
+
+
+async def authenticate_or_link_oauth_user(
+    session: AsyncSession,
+    oauth_info: OAuthUserInfo,
+) -> tuple[User, TokenResponse, bool]:
+    """Autentica usuário via OAuth2 com auto-linking por e-mail ou criação de nova conta."""
+    # 1. Verifica se já existe vínculo explícito por provider + provider_user_id
+    stmt = select(OAuthAccount).where(
+        OAuthAccount.provider == oauth_info.provider,
+        OAuthAccount.provider_user_id == oauth_info.provider_user_id,
+    )
+    res = await session.execute(stmt)
+    oauth_account = res.scalar_one_or_none()
+
+    is_new_user = False
+
+    if oauth_account:
+        user = await get_user_by_id(session, oauth_account.user_id)
+        if not user or not user.is_active:
+            raise UnauthorizedException(message="Esta conta de usuário está desativada ou inexistente.")
+    else:
+        # 2. Verifica se já existe usuário com o mesmo e-mail para auto-linking
+        user = await get_user_by_email(session, oauth_info.email)
+
+        if user:
+            # Vincula a conta social ao usuário existente
+            new_oauth = OAuthAccount(
+                user_id=user.id,
+                provider=oauth_info.provider,
+                provider_user_id=oauth_info.provider_user_id,
+            )
+            session.add(new_oauth)
+            if oauth_info.avatar_url and not user.avatar_url:
+                user.avatar_url = oauth_info.avatar_url
+            await session.flush()
+        else:
+            # 3. Cria novo usuário social
+            is_new_user = True
+            user = User(
+                email=oauth_info.email.lower(),
+                hashed_password=None,
+                full_name=oauth_info.full_name,
+                avatar_url=oauth_info.avatar_url,
+                is_active=True,
+                is_superuser=False,
+            )
+            session.add(user)
+            await session.flush()
+
+            new_oauth = OAuthAccount(
+                user_id=user.id,
+                provider=oauth_info.provider,
+                provider_user_id=oauth_info.provider_user_id,
+            )
+            session.add(new_oauth)
+            await session.flush()
+
+    tokens = await create_tokens_for_user(session, user)
+    return user, tokens, is_new_user
 
 
 async def refresh_tokens(session: AsyncSession, refresh_token_str: str) -> TokenResponse:

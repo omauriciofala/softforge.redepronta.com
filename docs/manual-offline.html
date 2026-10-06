@@ -216,7 +216,9 @@
       <a href="#ia">4. Fluxo com IA (AGENTS.md)</a>
       <a href="#doc-rule">5. Regra: Documentação para IA</a>
       <a href="#contratos">6. Contratos & OpenAPI 3.1</a>
-      <a href="#faq">7. FAQ & Troubleshooting</a>
+      <a href="#fatia-auth">7. Fatia: Auth & Social OAuth2</a>
+      <a href="#fatia-billing">8. Fatia: Billing & Mercado Pago</a>
+      <a href="#faq">9. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -362,6 +364,37 @@ python -m venv apps/api/.venv
           <li><strong>Extração Estática a Frio:</strong> O comando <code>python tools/scripts/export_openapi.py</code> exporta o <code>openapi.json</code> em menos de 1 segundo sem precisar de servidor rodando.</li>
           <li><strong>Geração Tipada no Frontend:</strong> O Orval lê a especificação e cria tipos TypeScript e hooks TanStack Query com tipagem estrita de ponta a ponta.</li>
         </ul>
+      </section>
+
+      <hr>
+
+      <section id="fatia-auth">
+        <h1>Fatia: Autenticação Social & OAuth2</h1>
+        <p>A fatia <code>auth</code> oferece suporte nativo a login com um clique via <strong>Google</strong> e <strong>GitHub</strong>, além do fluxo tradicional de e-mail e senha:</p>
+        <ul>
+          <li><strong>Auto-Linking Inteligente:</strong> Vincula contas sociais automaticamente a usuários cadastrados previamente com o mesmo e-mail verificado.</li>
+          <li><strong>Tabela Dedicada:</strong> <code>oauth_accounts</code> armazena pares <code>(provider, provider_user_id)</code> únicos por usuário.</li>
+          <li><strong>Senhas Opcionais:</strong> Usuários de login social possuem <code>hashed_password</code> nulo com suporte a definição de senha posterior.</li>
+          <li><strong>Desenvolvimento Offline:</strong> Mock automático ativado quando nenhuma chave for configurada, permitindo login instantâneo com códigos de teste.</li>
+        </ul>
+        <pre><code>GET /api/v1/auth/oauth/{provider}/authorize  -> Gera URL de consentimento
+GET /api/v1/auth/oauth/{provider}/callback   -> Valida code, autentica e emite tokens</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-billing">
+        <h1>Fatia: Billing & Mercado Pago</h1>
+        <p>Motor de faturamento híbrido projetado para o mercado brasileiro e internacional com faturamento B2B (Workspace) e B2C (User):</p>
+        <ul>
+          <li><strong>Pix Transparente:</strong> Emissão de Pix com chave Copia e Cola e QR Code dinâmico sem redirecionamento externo.</li>
+          <li><strong>Gestão de Planos:</strong> Planos Starter (Free), Profissional (Pro) e Empresarial (Enterprise).</li>
+          <li><strong>Controle Declarativo de Quotas:</strong> Dependência FastAPI <code>check_quota("projects")</code> que protege a criação de recursos na API.</li>
+          <li><strong>Adaptador Mock Nativo:</strong> Testes de checkout e webhooks 100% offline em menos de 2 segundos.</li>
+        </ul>
+        <pre><code>GET  /api/v1/billing/plans         -> Catálogo de planos e limites
+GET  /api/v1/billing/subscription  -> Status da assinatura e cotas ativas
+POST /api/v1/billing/checkout      -> Emissão de cobrança Pix ou Cartão</code></pre>
       </section>
 
       <hr>

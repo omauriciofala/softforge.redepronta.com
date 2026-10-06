@@ -33,12 +33,19 @@ class Settings(BaseSettings):
         "postgresql+asyncpg://softforge:softforge_secret@localhost:5432/softforge_db"
     )
 
-    # CORS
+    # CORS & Frontend
+    FRONTEND_URL: str = "http://localhost:5173"
     BACKEND_CORS_ORIGINS: list[str] = [
         "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
+
+    # OAuth2 Social Login
+    GOOGLE_CLIENT_ID: str = ""
+    GOOGLE_CLIENT_SECRET: str = ""
+    GITHUB_CLIENT_ID: str = ""
+    GITHUB_CLIENT_SECRET: str = ""
 
     # Logging
     LOG_LEVEL: str = "DEBUG"

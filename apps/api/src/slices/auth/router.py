@@ -1,13 +1,17 @@
+import secrets
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, Query, Request, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.core.database import get_db
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
+from src.slices.auth.oauth import get_oauth_provider
 from src.slices.auth.schemas import (
+    OAuthAuthorizeResponse,
+    OAuthCallbackResponse,
     RefreshTokenRequest,
     TokenResponse,
     UserLoginRequest,
@@ -15,6 +19,7 @@ from src.slices.auth.schemas import (
     UserResponse,
 )
 from src.slices.auth.service import (
+    authenticate_or_link_oauth_user,
     authenticate_user,
     create_tokens_for_user,
     create_user,
@@ -114,3 +119,68 @@ async def get_me(
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> UserResponse:
     return UserResponse.model_validate(current_user)
+
+
+# ==========================================
+# Endpoints de Autenticação Social (OAuth2)
+# ==========================================
+
+
+@router.get(
+    "/oauth/{provider}/authorize",
+    response_model=OAuthAuthorizeResponse,
+    summary="Obter URL de Autorização OAuth2",
+    description="Gera a URL de redirecionamento para login via Google ou GitHub com proteção CSRF.",
+)
+async def oauth_authorize(
+    provider: str,
+    request: Request,
+    redirect_uri: str | None = Query(None, description="URL de retorno personalizada"),
+) -> OAuthAuthorizeResponse:
+    oauth_provider = get_oauth_provider(provider)
+    state = secrets.token_urlsafe(32)
+
+    default_redirect = f"{request.base_url}api/v1/auth/oauth/{provider.lower()}/callback"
+    auth_url = oauth_provider.get_authorization_url(
+        state=state,
+        redirect_uri=redirect_uri or default_redirect,
+    )
+
+    return OAuthAuthorizeResponse(
+        authorization_url=auth_url,
+        state=state,
+        provider=provider.lower(),
+    )
+
+
+@router.get(
+    "/oauth/{provider}/callback",
+    response_model=OAuthCallbackResponse,
+    summary="Callback de Autorização OAuth2",
+    description="Processa o código retornado pelo Google/GitHub, autentica ou cria o usuário e define cookies HttpOnly.",
+)
+async def oauth_callback(
+    provider: str,
+    code: str = Query(..., description="Código de autorização retornado pelo provedor"),
+    state: str = Query(..., description="Token de validação CSRF"),
+    request: Request = None,
+    response: Response = None,
+    session: AsyncSession = Depends(get_db),
+) -> OAuthCallbackResponse:
+    _ = state
+    oauth_provider = get_oauth_provider(provider)
+    callback_redirect = f"{request.base_url}api/v1/auth/oauth/{provider.lower()}/callback"
+
+    user_info = await oauth_provider.exchange_code(code=code, redirect_uri=callback_redirect)
+    user, tokens, is_new_user = await authenticate_or_link_oauth_user(session, user_info)
+
+    if response:
+        _set_auth_cookies(response, tokens)
+
+    return OAuthCallbackResponse(
+        access_token=tokens.access_token,
+        refresh_token=tokens.refresh_token,
+        token_type=tokens.token_type,
+        user=UserResponse.model_validate(user),
+        is_new_user=is_new_user,
+    )
