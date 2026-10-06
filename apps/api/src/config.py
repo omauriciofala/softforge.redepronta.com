@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     GITHUB_CLIENT_ID: str = ""
     GITHUB_CLIENT_SECRET: str = ""
 
+    # Redis & Background Workers (Arq)
+    REDIS_URL: str = "redis://localhost:6379/0"
+    WORKER_BURST: bool = False
+
     # Logging
     LOG_LEVEL: str = "DEBUG"
     LOG_FORMAT: Literal["colored", "json"] = "colored"

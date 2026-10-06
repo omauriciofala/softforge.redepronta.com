@@ -11,6 +11,7 @@ from src.core.database import engine
 from src.core.errors import register_exception_handlers
 from src.core.logging import logger, setup_logging
 from src.core.middleware import RequestContextMiddleware
+from src.core.queue import close_queue_pool, init_queue_pool
 from src.slices.auth.router import router as auth_router
 from src.slices.billing.router import router as billing_router
 from src.slices.projects.router import router as projects_router
@@ -23,8 +24,10 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     logger.info(
         f"Iniciando {settings.PROJECT_NAME} v{settings.VERSION} no ambiente '{settings.ENVIRONMENT}'"
     )
+    await init_queue_pool()
     yield
-    logger.info("Encerrando conexões com banco de dados...")
+    logger.info("Encerrando conexões com fila e banco de dados...")
+    await close_queue_pool()
     await engine.dispose()
     logger.info("Servidor finalizado com sucesso.")
 

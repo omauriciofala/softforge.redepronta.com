@@ -218,7 +218,8 @@
       <a href="#contratos">6. Contratos & OpenAPI 3.1</a>
       <a href="#fatia-auth">7. Fatia: Auth & Social OAuth2</a>
       <a href="#fatia-billing">8. Fatia: Billing & Mercado Pago</a>
-      <a href="#faq">9. FAQ & Troubleshooting</a>
+      <a href="#fatia-workers">9. Fila Assíncrona & Workers (Arq)</a>
+      <a href="#faq">10. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -395,6 +396,21 @@ GET /api/v1/auth/oauth/{provider}/callback   -> Valida code, autentica e emite t
         <pre><code>GET  /api/v1/billing/plans         -> Catálogo de planos e limites
 GET  /api/v1/billing/subscription  -> Status da assinatura e cotas ativas
 POST /api/v1/billing/checkout      -> Emissão de cobrança Pix ou Cartão</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-workers">
+        <h1>Fila Assíncrona & Background Workers (Arq + Redis)</h1>
+        <p>Motor de processamento assíncrono em segundo plano e cron jobs periódicos desacoplados da API:</p>
+        <ul>
+          <li><strong>100% Asyncio Nativo:</strong> Utiliza o Arq sobre Redis 7, operando com funções <code>async def</code> e compatível diretamente com SQLAlchemy 2.0 Async e httpx.</li>
+          <li><strong>Isolamento em Contêiner:</strong> O serviço <code>worker</code> roda em contêiner dedicado no <code>docker-compose.yml</code>.</li>
+          <li><strong>Desenvolvimento & Testes Offline:</strong> <code>FakeQueueClient</code> em memória permite enfileirar e testar tarefas no <code>pytest</code> em menos de 1 segundo sem necessidade de Redis ativo.</li>
+          <li><strong>Cron Integrado:</strong> Agendamento declarativo de expurgo de tokens revogados às 03:00 UTC diariamente.</li>
+        </ul>
+        <pre><code>queue = await get_queue()
+job_id = await queue.enqueue("send_transactional_email", to_email="...", subject="...")</code></pre>
       </section>
 
       <hr>

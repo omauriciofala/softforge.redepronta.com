@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.config import settings
 from src.core.database import get_db
+from src.core.queue import get_queue
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
 from src.slices.auth.oauth import get_oauth_provider
@@ -49,18 +50,26 @@ def _set_auth_cookies(response: Response, tokens: TokenResponse) -> None:
     )
 
 
+
 @router.post(
     "/register",
     response_model=UserResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Registrar novo usuário",
-    description="Cria uma nova conta de usuário no sistema.",
+    description="Cria uma nova conta de usuário no sistema e enfileira e-mail de boas-vindas assíncrono.",
 )
 async def register(
     req: UserRegisterRequest,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> UserResponse:
     user = await create_user(session, req)
+    queue = await get_queue()
+    await queue.enqueue(
+        "send_transactional_email",
+        to_email=user.email,
+        subject="Bem-vindo ao SoftForge!",
+        body_html=f"<p>Olá {user.full_name or 'Desenvolvedor'}, sua conta no SoftForge foi criada com sucesso!</p>",
+    )
     return UserResponse.model_validate(user)
 
 
