@@ -71,7 +71,12 @@ def main() -> None:
     if not run_step("Backend Integration Tests", [py_exec, "-m", "pytest", "-v"], cwd=api_dir):
         success = False
 
-    # 3. Linter e Verificação de Código com Ruff
+    # 3. Validação de Migrações do Banco de Dados (Alembic SQL DDL Check)
+    migrate_script = root_dir / "tools" / "scripts" / "migrate.py"
+    if not run_step("Database Migrations Validation", [py_exec, str(migrate_script), "sql"]):
+        success = False
+
+    # 4. Linter e Verificação de Código com Ruff
     if not run_step("Backend Linter (Ruff)", [py_exec, "-m", "ruff", "check", "src"], cwd=api_dir):
         success = False
 

@@ -75,3 +75,27 @@ O SoftForge utiliza **Loguru** com injeção automática de **Correlation ID (`X
 - **Em Desenvolvimento:** Logs coloridos, legíveis e com indicação exata de arquivo, função e linha.
 - **Em Produção:** JSON estruturado, ideal para ingestão em Datadog, Grafana Loki, CloudWatch ou análise por agentes de IA.
 - Toda requisição HTTP responde com os headers `X-Request-ID` e `X-Process-Time` (ex: `12.45ms`).
+
+---
+
+## 5. Ciclo de Vida do Banco de Dados & Migrações (Alembic)
+
+O SoftForge adota o **Alembic assíncrono** com suporte total a migrações orientadas a fatias verticais:
+
+- **Descoberta Automática de Fatias:** O `apps/api/alembic/env.py` invoca `discover_and_import_models()`, detectando qualquer nova fatia criada em `apps/api/src/slices/*/models.py` sem exigir configuração manual.
+- **Convenção de Constraints:** Utiliza nomes determinísticos (`pk_...`, `fk_...`, `uq_...`, `ix_...`) garantindo paridade e integridade no PostgreSQL.
+- **Ferramenta Unificada (`tools/scripts/migrate.py`):**
+  ```bash
+  # Gerar nova migração baseada nas alterações dos models
+  python tools/scripts/migrate.py makemigrations "adiciona_campo_prioridade"
+
+  # Aplicar migrações pendentes no PostgreSQL
+  python tools/scripts/migrate.py upgrade
+
+  # Reverter última migração
+  python tools/scripts/migrate.py downgrade -1
+
+  # Validar SQL puro das migrações offline (sem conectar ao banco)
+  python tools/scripts/migrate.py sql
+  ```
+- **Infraestrutura Local:** O arquivo `docker-compose.yml` na raiz sobe o PostgreSQL 16 oficial com um único comando: `docker compose up -d`.

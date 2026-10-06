@@ -4,13 +4,11 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-from src.core.database import Base, get_db
+from src.core.database import Base, discover_and_import_models, get_db
 from src.main import app
 
-# Importa todos os models para que o Base.metadata reconheça todas as tabelas
-import src.slices.auth.models  # noqa: F401
-import src.slices.projects.models  # noqa: F401
-import src.slices.workspaces.models  # noqa: F401
+# Descobre e importa dinamicamente todos os models de todas as fatias
+discover_and_import_models()
 
 # Banco de dados SQLite in-memory para testes assíncronos ultrarrápidos e isolados
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"

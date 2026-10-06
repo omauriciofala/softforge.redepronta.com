@@ -41,6 +41,7 @@ SoftForge was built on a single architectural principle: **every technology must
 | **FastAPI** | `0.115+` | HTTP Framework & Routing | Native OpenAPI 3.1 spec generation, built-in dependency injection, and asynchronous throughput. |
 | **Pydantic** | `v2.10+` | Validation & DTOs | Rust core (blazing fast), strict data validation, and clean two-way serialization. |
 | **SQLAlchemy** | `2.0+ (Async)` | ORM & Query Builder | Industry standard; strictly typed models with `Mapped[...]` and native `AsyncSession`. |
+| **Alembic** | `1.13+ (Async)` | Database Migrations | Deterministic schema versioning with async migrations for PostgreSQL and naming conventions. |
 | **Loguru** | `0.7+` | Observability & Logging | Structured JSON or colorized console logs with automated `X-Request-ID` correlation. |
 | **PyJWT & Passlib** | Latest | Security & Authentication | Password hashing (Argon2 / bcrypt) and dual JWT support (HttpOnly cookies + Bearer headers). |
 | **Ruff** | `0.9+` | Linter & Formatter | Rust-based (<100ms execution) replacing Black, Flake8, and isort for spotless code hygiene. |
@@ -66,4 +67,5 @@ SoftForge was built on a single architectural principle: **every technology must
 
 1. **`tools/scripts/slice_scaffold.py`:** Deterministically creates full vertical slices (`schemas.py`, `models.py`, `service.py`, `router.py`, `tests/`).
 2. **`tools/scripts/export_openapi.py`:** Generates OpenAPI 3.1 schema definitions.
-3. **`tools/scripts/verify.py`:** Quality gatekeeper running linters and tests before any task completion.
+3. **`tools/scripts/migrate.py`:** Unified Alembic migration runner (`makemigrations`, `upgrade`, `downgrade`, `sql`) with auto-discovery of slice models.
+4. **`tools/scripts/verify.py`:** Quality gatekeeper running linters, migration validations, and tests before any task completion.

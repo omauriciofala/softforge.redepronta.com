@@ -41,6 +41,7 @@ O SoftForge foi desenhado com base em um critério rigoroso: **cada tecnologia d
 | **FastAPI** | `0.115+` | Framework HTTP & Roteamento | Geração automática de OpenAPI 3.1, injeção de dependências nativa e alta performance assíncrona com `asyncio`. |
 | **Pydantic** | `v2.10+` | Validação de Dados & DTOs | Núcleo escrito em Rust (ultra-rápido), validação rigorosa de esquemas e conversão bidirecional com tipagem estrita. |
 | **SQLAlchemy** | `2.0+ (Async)` | ORM & Query Builder | Padrão da indústria para Python; sintaxe tipada com `Mapped[...]`, suporte assíncrono nativo com `AsyncSession`. |
+| **Alembic** | `1.13+ (Async)` | Migrações de Banco de Dados | Versionamento determinístico de schema com migrações assíncronas para PostgreSQL e convenção de constraints. |
 | **Loguru** | `0.7+` | Observabilidade & Logs | Logs estruturados em JSON ou coloridos no terminal, com injeção automática de `X-Request-ID` para rastreabilidade. |
 | **PyJWT & Passlib** | Recente | Segurança & Autenticação | Hashing seguro de senhas (Argon2 / bcrypt) e emissão de tokens JWT com dupla camada (HttpOnly cookie + Bearer header). |
 | **Ruff** | `0.9+` | Linter e Formatador | Escrito em Rust; substitui Flake8, Black e isort com velocidade instantânea (<100ms), mantendo o código impecável. |
@@ -83,8 +84,10 @@ Ferramentas nativas do repositório para garantir que qualquer IA (Cursor, Antig
    - Cria o esqueleto completo de uma nova fatia vertical (`schemas.py`, `models.py`, `service.py`, `router.py`, `tests/`) já com tipagem estrita e convenções prontas.
 2. **`tools/scripts/export_openapi.py`:**
    - Extrai a especificação OpenAPI 3.1 oficial para `docs/openapi.json` e `contracts/openapi.json`.
-3. **`tools/scripts/verify.py`:**
-   - Gatekeeper de qualidade: roda o Ruff linter, verifica sintaxe e executa 100% dos testes Pytest antes de qualquer commit ou aprovação de tarefa.
+3. **`tools/scripts/migrate.py`:**
+   - Orquestrador unificado de migrações Alembic (`makemigrations`, `upgrade`, `downgrade`, `sql`) com descoberta automática de modelos em todas as fatias.
+4. **`tools/scripts/verify.py`:**
+   - Gatekeeper de qualidade: roda o Ruff linter, verifica integridade das migrações SQL e executa 100% dos testes Pytest antes de qualquer commit ou aprovação de tarefa.
 
 ---
 

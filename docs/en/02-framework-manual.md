@@ -62,3 +62,27 @@ Powered by **Loguru** with automatic **Correlation ID (`X-Request-ID`)** propaga
 - **Development:** Color-coded, highly readable logs showing file, function, and line.
 - **Production:** Structured JSON logs ready for Datadog, Loki, or CloudWatch ingestion.
 - Every HTTP response includes `X-Request-ID` and `X-Process-Time`.
+
+---
+
+## 5. Database Lifecycle & Migrations (Alembic)
+
+SoftForge uses **Async Alembic** engineered specifically for vertical slice architectures:
+
+- **Dynamic Slice Model Discovery:** `apps/api/alembic/env.py` calls `discover_and_import_models()`, auto-detecting any models defined in `apps/api/src/slices/*/models.py`.
+- **Constraint Naming Conventions:** Enforces deterministic constraint names (`pk_...`, `fk_...`, `uq_...`, `ix_...`) for PostgreSQL integrity.
+- **Unified Tooling (`tools/scripts/migrate.py`):**
+  ```bash
+  # Generate a new migration based on slice model changes
+  python tools/scripts/migrate.py makemigrations "add_priority_field"
+
+  # Apply pending migrations to PostgreSQL
+  python tools/scripts/migrate.py upgrade
+
+  # Revert the latest migration
+  python tools/scripts/migrate.py downgrade -1
+
+  # Emit raw offline SQL without connecting to the database
+  python tools/scripts/migrate.py sql
+  ```
+- **Local Infrastructure:** `docker-compose.yml` in the root starts the official PostgreSQL 16 instance with `docker compose up -d`.
