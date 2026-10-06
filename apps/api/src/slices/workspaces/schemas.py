@@ -62,5 +62,54 @@ class WorkspaceMemberResponse(BaseModel):
     user_id: uuid.UUID
     email: EmailStr
     full_name: str
+    avatar_url: str | None = None
     role: WorkspaceRole
     created_at: datetime
+
+
+class WorkspaceMemberListResponse(BaseModel):
+    """Schema para listagem de membros do workspace."""
+
+    items: list[WorkspaceMemberResponse]
+    total: int
+
+
+class WorkspaceInviteCreate(BaseModel):
+    """Schema para emissão de um novo convite de equipe."""
+
+    email: EmailStr = Field(description="E-mail corporativo da pessoa convidada")
+    role: WorkspaceRole = Field(
+        default=WorkspaceRole.MEMBER,
+        description="Cargo RBAC atribuído ao membro quando o convite for aceito",
+    )
+
+
+class WorkspaceInviteResponse(BaseModel):
+    """Schema de dados do convite de equipe."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    workspace_id: uuid.UUID
+    invited_by_user_id: uuid.UUID
+    email: str
+    role: WorkspaceRole
+    status: str
+    token: str
+    expires_at: datetime
+    accepted_at: datetime | None = None
+    created_at: datetime
+
+
+class WorkspaceInviteListResponse(BaseModel):
+    """Schema de listagem de convites do workspace."""
+
+    items: list[WorkspaceInviteResponse]
+    total: int
+
+
+class WorkspaceInviteAcceptRequest(BaseModel):
+    """Schema para aceitar um convite de equipe via token."""
+
+    token: str = Field(min_length=10, description="Token criptográfico do convite recebido")
+

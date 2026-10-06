@@ -1,20 +1,26 @@
 import re
+import secrets
 import uuid
+from datetime import UTC, datetime, timedelta
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.errors import AppException, NotFoundException
+from src.core.queue import get_queue
 from src.slices.auth.models import User
 from src.slices.auth.service import get_user_by_email
 from src.slices.workspaces.models import (
     Workspace,
+    WorkspaceInvite,
     WorkspaceMember,
     WorkspaceRole,
 )
 from src.slices.workspaces.schemas import (
     AddMemberRequest,
+    UpdateMemberRoleRequest,
     WorkspaceCreate,
+    WorkspaceInviteCreate,
     WorkspaceMemberResponse,
     WorkspaceResponse,
 )
@@ -198,3 +204,236 @@ async def remove_workspace_member(
     )
     if result.rowcount == 0:
         raise NotFoundException(message="Membro não encontrado no workspace")
+
+
+async def update_workspace_member_role(
+    session: AsyncSession,
+    workspace_id: uuid.UUID,
+    target_user_id: uuid.UUID,
+    req: UpdateMemberRoleRequest,
+    operator_user: User,
+) -> WorkspaceMemberResponse:
+    """Atualiza o papel (RBAC) de um membro existente no workspace."""
+    ws = await get_workspace(session, workspace_id)
+    if ws.owner_id == target_user_id and req.role != WorkspaceRole.OWNER:
+        raise AppException(
+            message="Não é permitido rebaixar o proprietário (Owner) do workspace.",
+            status_code=400,
+            code="CANNOT_DEMOTE_OWNER",
+        )
+
+    # Se estiver tentando promover para OWNER, o operador deve ser o próprio OWNER atual
+    if req.role == WorkspaceRole.OWNER and ws.owner_id != operator_user.id:
+        raise AppException(
+            message="Apenas o proprietário atual pode transferir a posse do workspace.",
+            status_code=403,
+            code="ONLY_OWNER_CAN_TRANSFER",
+        )
+
+    stmt = select(WorkspaceMember).where(
+        WorkspaceMember.workspace_id == workspace_id,
+        WorkspaceMember.user_id == target_user_id,
+    )
+    result = await session.execute(stmt)
+    member = result.scalar_one_or_none()
+    if not member:
+        raise NotFoundException(message="Membro não encontrado neste workspace.")
+
+    member.role = req.role
+    session.add(member)
+
+    # Se promovido a OWNER, atualiza o workspace.owner_id
+    if req.role == WorkspaceRole.OWNER:
+        ws.owner_id = target_user_id
+        session.add(ws)
+
+    await session.commit()
+    await session.refresh(member)
+
+    # Busca dados do usuário para resposta
+    user_stmt = select(User).where(User.id == target_user_id)
+    user_res = await session.execute(user_stmt)
+    user = user_res.scalar_one()
+
+    return WorkspaceMemberResponse(
+        id=member.id,
+        user_id=user.id,
+        email=user.email,
+        full_name=user.full_name,
+        avatar_url=user.avatar_url,
+        role=member.role,
+        created_at=member.created_at,
+    )
+
+
+async def create_workspace_invite(
+    session: AsyncSession,
+    workspace_id: uuid.UUID,
+    inviter_user: User,
+    req: WorkspaceInviteCreate,
+) -> WorkspaceInvite:
+    """Emite um convite de equipe para o e-mail informado com token seguro de 7 dias."""
+    email = req.email.lower().strip()
+
+    # 1. Verifica se já é membro ativo do workspace
+    existing_member_stmt = (
+        select(WorkspaceMember)
+        .join(User, WorkspaceMember.user_id == User.id)
+        .where(
+            WorkspaceMember.workspace_id == workspace_id,
+            func.lower(User.email) == email,
+        )
+    )
+    existing_member = await session.execute(existing_member_stmt)
+    if existing_member.scalar_one_or_none():
+        raise AppException(
+            message=f"O usuário com e-mail '{email}' já é membro ativo deste workspace.",
+            status_code=400,
+            code="USER_ALREADY_MEMBER",
+        )
+
+    # 2. Verifica se já existe um convite pendente para este e-mail no workspace
+    existing_invite_stmt = select(WorkspaceInvite).where(
+        WorkspaceInvite.workspace_id == workspace_id,
+        WorkspaceInvite.email == email,
+        WorkspaceInvite.status == "pending",
+    )
+    existing_invite_res = await session.execute(existing_invite_stmt)
+    existing_invite = existing_invite_res.scalar_one_or_none()
+
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.now(UTC) + timedelta(days=7)
+
+    if existing_invite:
+        # Renova o convite pendente existente
+        existing_invite.token = token
+        existing_invite.role = req.role
+        existing_invite.expires_at = expires_at
+        existing_invite.invited_by_user_id = inviter_user.id
+        invite = existing_invite
+    else:
+        invite = WorkspaceInvite(
+            workspace_id=workspace_id,
+            invited_by_user_id=inviter_user.id,
+            email=email,
+            role=req.role,
+            token=token,
+            status="pending",
+            expires_at=expires_at,
+        )
+        session.add(invite)
+
+    await session.commit()
+    await session.refresh(invite)
+
+    # 3. Dispara e-mail transacional em segundo plano via Arq Worker
+    queue = await get_queue()
+    try:
+        await queue.enqueue(
+            "send_transactional_email_task",
+            to_email=email,
+            subject="Convite para ingressar no Workspace - SoftForge",
+            content=f"Você foi convidado para colaborar no workspace da SoftForge. Token: {invite.token}",
+        )
+    except Exception:
+        pass
+
+    return invite
+
+
+async def list_workspace_invites(
+    session: AsyncSession,
+    workspace_id: uuid.UUID,
+) -> list[WorkspaceInvite]:
+    """Retorna todos os convites pendentes e não expirados do workspace."""
+    stmt = (
+        select(WorkspaceInvite)
+        .where(
+            WorkspaceInvite.workspace_id == workspace_id,
+            WorkspaceInvite.status == "pending",
+        )
+        .order_by(WorkspaceInvite.created_at.desc())
+    )
+    res = await session.execute(stmt)
+    return list(res.scalars().all())
+
+
+async def revoke_workspace_invite(
+    session: AsyncSession,
+    workspace_id: uuid.UUID,
+    invite_id: uuid.UUID,
+) -> WorkspaceInvite:
+    """Revoga imediatamente um convite de equipe pendente."""
+    stmt = select(WorkspaceInvite).where(
+        WorkspaceInvite.id == invite_id,
+        WorkspaceInvite.workspace_id == workspace_id,
+    )
+    res = await session.execute(stmt)
+    invite = res.scalar_one_or_none()
+    if not invite:
+        raise NotFoundException(message="Convite não encontrado.")
+
+    invite.status = "revoked"
+    session.add(invite)
+    await session.commit()
+    await session.refresh(invite)
+    return invite
+
+
+async def accept_workspace_invite(
+    session: AsyncSession,
+    token: str,
+    user: User,
+) -> tuple[Workspace, WorkspaceMember]:
+    """Valida o token do convite e adiciona o usuário autenticado como membro do workspace."""
+    stmt = select(WorkspaceInvite).where(
+        WorkspaceInvite.token == token.strip(),
+        WorkspaceInvite.status == "pending",
+    )
+    res = await session.execute(stmt)
+    invite = res.scalar_one_or_none()
+
+    if not invite:
+        raise NotFoundException(message="Convite inválido ou expirado.")
+
+    now_utc = datetime.now(UTC)
+    exp = invite.expires_at
+    if exp.tzinfo is None:
+        exp = exp.replace(tzinfo=UTC)
+
+    if exp < now_utc:
+        invite.status = "expired"
+        session.add(invite)
+        await session.commit()
+        raise AppException(
+            message="Este convite expirou. Solicite um novo convite ao administrador.",
+            status_code=400,
+            code="INVITE_EXPIRED",
+        )
+
+    # Verifica se o usuário já é membro do workspace
+    existing_membership_stmt = select(WorkspaceMember).where(
+        WorkspaceMember.workspace_id == invite.workspace_id,
+        WorkspaceMember.user_id == user.id,
+    )
+    existing_membership_res = await session.execute(existing_membership_stmt)
+    membership = existing_membership_res.scalar_one_or_none()
+
+    if not membership:
+        membership = WorkspaceMember(
+            workspace_id=invite.workspace_id,
+            user_id=user.id,
+            role=invite.role,
+        )
+        session.add(membership)
+
+    invite.status = "accepted"
+    invite.accepted_at = now_utc
+    session.add(invite)
+
+    await session.commit()
+    await session.refresh(membership)
+
+    ws = await get_workspace(session, invite.workspace_id)
+    return ws, membership
+
