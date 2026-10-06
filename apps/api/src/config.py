@@ -51,6 +51,16 @@ class Settings(BaseSettings):
     REDIS_URL: str = "redis://localhost:6379/0"
     WORKER_BURST: bool = False
 
+    # Storage & Uploads
+    STORAGE_BACKEND: Literal["local", "s3", "minio"] = "local"
+    STORAGE_LOCAL_DIR: str = "uploads"
+    MAX_UPLOAD_SIZE_MB: int = 25
+    S3_BUCKET_NAME: str = "softforge-uploads"
+    S3_REGION: str = "us-east-1"
+    S3_ENDPOINT_URL: str | None = None
+    S3_ACCESS_KEY_ID: str = ""
+    S3_SECRET_ACCESS_KEY: str = ""
+
     # Logging
     LOG_LEVEL: str = "DEBUG"
     LOG_FORMAT: Literal["colored", "json"] = "colored"

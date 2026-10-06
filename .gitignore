@@ -65,3 +65,5 @@ Thumbs.db
 apps/api/openapi.json
 apps/web/src/api/generated/
 docs/.vitepress/cache
+uploads/
+apps/api/uploads/

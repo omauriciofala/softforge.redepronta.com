@@ -224,7 +224,8 @@
       <a href="#fatia-webhooks">12. Fatia: Webhooks Outbound</a>
       <a href="#fatia-apikeys">13. Fatia: Chaves de API & PAT (M2M)</a>
       <a href="#fatia-invites">14. Fatia: Convites & Membros (RBAC)</a>
-      <a href="#faq">15. FAQ & Troubleshooting</a>
+      <a href="#fatia-storage">15. Fatia: Storage & Arquivos</a>
+      <a href="#faq">16. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -507,6 +508,25 @@ POST   /api/v1/workspaces/invites/accept        -> Aceita convite via token
 GET    /api/v1/workspaces/{id}/members          -> Lista membros ativos da equipe
 PATCH  /api/v1/workspaces/{id}/members/{user_id}-> Altera cargo RBAC de membro
 DELETE /api/v1/workspaces/{id}/members/{user_id}-> Remove membro do workspace</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-storage">
+        <h1>Fatia: Storage & Gerenciamento de Arquivos</h1>
+        <p>Armazenamento unificado de anexos, documentos e imagens de perfil com suporte híbrido para nuvem e offline:</p>
+        <ul>
+          <li><strong>Provedor Híbrido:</strong> Opera localmente na pasta <code>uploads/</code> durante desenvolvimento e testes offline, e compatível com AWS S3, Cloudflare R2 e MinIO em produção.</li>
+          <li><strong>Isolamento Multi-Tenant:</strong> Arquivos privados vinculados a workspaces são bloqueados contra acesso de usuários de tenants externos com 403 Forbidden.</li>
+          <li><strong>Arquivos Públicos:</strong> Avatares de usuário (<code>/users/me/avatar</code>) são servidos de forma pública sem cabeçalho de autenticação para renderização instantânea no navegador.</li>
+          <li><strong>Limites de Upload:</strong> Controle rígido de tamanho máximo (<code>MAX_UPLOAD_SIZE_MB</code>) com retorno 413 Payload Too Large para arquivos excessivos.</li>
+          <li><strong>Sanitização de Nomes:</strong> Limpeza regex de nomes de arquivos para prevenir ataques de *path traversal* (<code>../</code>).</li>
+        </ul>
+        <pre><code>POST   /api/v1/workspaces/{id}/storage/upload       -> Upload de arquivo multipart
+GET    /api/v1/workspaces/{id}/storage/files        -> Lista arquivos do workspace
+DELETE /api/v1/workspaces/{id}/storage/files/{id}   -> Exclui arquivo físico e registro
+GET    /api/v1/storage/files/{id}/download          -> Download ou streaming binário
+POST   /api/v1/users/me/avatar                      -> Upload de foto de perfil pública</code></pre>
       </section>
 
       <hr>
