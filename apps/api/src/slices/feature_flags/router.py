@@ -87,7 +87,11 @@ async def get_feature(
     _ = current_user
     flag = await FeatureFlagService.get_flag_by_id(session, flag_id)
     if not flag:
-        raise NotFoundException(f"Feature flag com ID '{flag_id}' não encontrada")
+        raise NotFoundException(
+            message=f"Feature flag com ID '{flag_id}' não encontrada",
+            message_key="errors.feature_flag_not_found",
+            message_kwargs={"flag_id": str(flag_id)},
+        )
     return flag
 
 
@@ -105,7 +109,11 @@ async def update_feature(
 ) -> FeatureFlag:
     flag = await FeatureFlagService.get_flag_by_id(session, flag_id)
     if not flag:
-        raise NotFoundException(f"Feature flag com ID '{flag_id}' não encontrada")
+        raise NotFoundException(
+            message=f"Feature flag com ID '{flag_id}' não encontrada",
+            message_key="errors.feature_flag_not_found",
+            message_kwargs={"flag_id": str(flag_id)},
+        )
 
     updated = await FeatureFlagService.update_flag(session, flag, data)
 
@@ -134,7 +142,11 @@ async def delete_feature(
 ) -> None:
     flag = await FeatureFlagService.get_flag_by_id(session, flag_id)
     if not flag:
-        raise NotFoundException(f"Feature flag com ID '{flag_id}' não encontrada")
+        raise NotFoundException(
+            message=f"Feature flag com ID '{flag_id}' não encontrada",
+            message_key="errors.feature_flag_not_found",
+            message_kwargs={"flag_id": str(flag_id)},
+        )
 
     await FeatureFlagService.delete_flag(session, flag)
 

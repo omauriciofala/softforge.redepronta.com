@@ -227,7 +227,8 @@
       <a href="#fatia-storage">15. Fatia: Storage & Arquivos</a>
       <a href="#fatia-ratelimit">16. Fatia: Rate Limiting & Proteção</a>
       <a href="#fatia-features">17. Fatia: Feature Flags & Toggles</a>
-      <a href="#faq">18. FAQ & Troubleshooting</a>
+      <a href="#i18n">18. Internacionalização (i18n)</a>
+      <a href="#faq">19. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -569,6 +570,24 @@ GET    /api/v1/workspaces/{id}/features             -> Retorna mapa avaliado par
 POST   /api/v1/workspaces/{id}/features/{id}/override -> Força ativação/desativação no tenant
 DELETE /api/v1/workspaces/{id}/features/{id}/override -> Remove substituição local do tenant
 GET    /api/v1/workspaces/{id}/features/demo-guarded -> Endpoint modelo protegido por flag</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="i18n">
+        <h1>Internacionalização (i18n) & Localização Global</h1>
+        <p>Suporte bilíngue nativo para Português do Brasil (<code>pt-BR</code>) e Inglês (<code>en-US</code>) com negociação de conteúdo via RFC 7231:</p>
+        <ul>
+          <li><strong>Negociação via Accept-Language:</strong> Resolução de pesos de preferência (<i>q-factors</i>) no backend via <code>RequestContextMiddleware</code> com fallback transparente para <code>pt-BR</code>.</li>
+          <li><strong>Cabeçalho Content-Language:</strong> Todas as respostas HTTP do backend emitem o idioma efetivo no cabeçalho <code>Content-Language: {locale}</code>.</li>
+          <li><strong>Tradução Automática de Exceções:</strong> Erros de validação (422), falta de autenticação (401), permissões negadas (403), recursos inexistentes (404) e rate limit (429) são traduzidos automaticamente.</li>
+          <li><strong>Frontend Tipado em Tempo de Compilação:</strong> Dicionários <code>pt-BR.ts</code> e <code>en-US.ts</code> com validação estrita TypeScript através de <code>TranslationSchema</code>.</li>
+          <li><strong>Sincronização Axios:</strong> Ao alternar o idioma na interface via <code>LanguageSwitcher</code>, o cliente Axios atualiza o cabeçalho padrão <code>Accept-Language</code> para todas as requisições subsequentes.</li>
+          <li><strong>Endpoint de Diagnóstico:</strong> <code>GET /api/v1/system/i18n</code> para inspeção dos idiomas suportados e idioma ativo detectado.</li>
+        </ul>
+        <pre><code>GET    /api/v1/system/i18n                          -> Status do motor i18n e idioma ativo
+Accept-Language: en-US,en;q=0.9                    -> Solicita respostas em inglês
+Accept-Language: pt-BR,pt;q=0.9                    -> Solicita respostas em português</code></pre>
       </section>
 
       <hr>

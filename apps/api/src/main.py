@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
 from src.core.database import engine
 from src.core.errors import register_exception_handlers
+from src.core.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, get_translations_catalog, t
 from src.core.logging import logger, setup_logging
 from src.core.middleware import RequestContextMiddleware
 from src.core.queue import close_queue_pool, init_queue_pool
@@ -105,5 +106,22 @@ async def get_rate_limit_status(
         "limit": int(response.headers.get("X-RateLimit-Limit", "60")),
         "remaining": int(response.headers.get("X-RateLimit-Remaining", "59")),
         "reset_time": int(response.headers.get("X-RateLimit-Reset", "0")),
+    }
+
+
+@app.get(
+    f"{settings.API_V1_STR}/system/i18n",
+    tags=["Sistema"],
+    summary="Consultar status de internacionalização (i18n)",
+    description="Informa o idioma detectado da requisição, idiomas suportados pelo framework e mensagens traduzidas.",
+)
+async def get_i18n_status(request: Request) -> dict[str, Any]:
+    locale = getattr(request.state, "locale", DEFAULT_LOCALE)
+    return {
+        "current_locale": locale,
+        "default_locale": DEFAULT_LOCALE,
+        "supported_locales": list(SUPPORTED_LOCALES),
+        "welcome_message": t("system.welcome", locale=locale),
+        "translations_count": len(get_translations_catalog(locale)),
     }
 

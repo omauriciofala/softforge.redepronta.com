@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { I18nProvider, LanguageSwitcher } from "./core/i18n";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { AuthForms } from "./features/auth/AuthForms";
 import { DocsViewer } from "./features/docs/DocsViewer";
@@ -66,9 +67,16 @@ const AppContent: React.FC = () => {
 export const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <I18nProvider>
+        <AuthProvider>
+          <div className="relative min-h-screen">
+            <div className="fixed top-4 right-4 z-50">
+              <LanguageSwitcher />
+            </div>
+            <AppContent />
+          </div>
+        </AuthProvider>
+      </I18nProvider>
     </QueryClientProvider>
   );
 };
