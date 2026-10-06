@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
 from src.core.errors import ForbiddenException
+from src.slices.apikeys.dependencies import get_current_api_key
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
 from src.slices.workspaces.models import (
@@ -23,6 +24,7 @@ def require_workspace_role(
     """
     Fábrica de dependências que valida se o usuário autenticado é membro do workspace
     e possui permissão igual ou superior ao papel exigido (RBAC).
+    Caso a requisição utilize uma Chave de API (M2M), valida também o isolamento do tenant.
     """
 
     async def _checker(
@@ -30,6 +32,12 @@ def require_workspace_role(
         current_user: Annotated[User, Depends(get_current_user)],
         session: Annotated[AsyncSession, Depends(get_db)],
     ) -> WorkspaceMember:
+        api_key = get_current_api_key()
+        if api_key and api_key.workspace_id != workspace_id:
+            raise ForbiddenException(
+                message="Esta chave de API não possui autorização para operar neste workspace."
+            )
+
         stmt = select(WorkspaceMember).where(
             WorkspaceMember.workspace_id == workspace_id,
             WorkspaceMember.user_id == current_user.id,

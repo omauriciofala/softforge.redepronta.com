@@ -222,7 +222,8 @@
       <a href="#fatia-audit">10. Fatia: Auditoria & Compliance</a>
       <a href="#fatia-notifications">11. Fatia: Notificações & WebSockets</a>
       <a href="#fatia-webhooks">12. Fatia: Webhooks Outbound</a>
-      <a href="#faq">13. FAQ & Troubleshooting</a>
+      <a href="#fatia-apikeys">13. Fatia: Chaves de API & PAT (M2M)</a>
+      <a href="#faq">14. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -465,6 +466,24 @@ WS    /api/v1/notifications/ws           -> Streaming em tempo real</code></pre>
         <pre><code>POST   /api/v1/workspaces/{id}/webhooks                  -> Cadastra endpoint
 GET    /api/v1/workspaces/{id}/webhooks                  -> Lista endpoints
 GET    /api/v1/workspaces/{id}/webhooks/{id}/deliveries  -> Histórico de entregas</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-apikeys">
+        <h1>Fatia: Chaves de API & PAT (Machine-to-Machine)</h1>
+        <p>Autenticação programática de alta segurança para Agentes Autônomos de IA, ferramentas CLI e pipelines CI/CD:</p>
+        <ul>
+          <li><strong>Autenticação M2M Nativa:</strong> Permite que agentes externos de IA (ex: Cursor, Claude Dev, AutoPR) consumam a API via cabeçalho <code>X-API-Key: sf_live_...</code> ou <code>Authorization: Bearer sf_live_...</code>.</li>
+          <li><strong>Criptografia com Hash SHA-256:</strong> O segredo em texto puro é exibido exclusivamente no momento da criação. O banco de dados armazena apenas o digest SHA-256 (<code>hashed_key</code>).</li>
+          <li><strong>Prefixo Mascarado para Auditoria:</strong> A listagem exibe o prefixo e sufixo mascarados (ex: <code>sf_live_abc1...9xyz</code>) para identificação visual sem vazamento de segredos.</li>
+          <li><strong>Validade Temporal & Expiração:</strong> Suporte a prazo de expiração em dias (<code>expires_in_days</code>) ou validade permanente.</li>
+          <li><strong>Revogação Instantânea:</strong> Invalidada no banco no momento do clique, gerando 401 Unauthorized imediato para requisições subsequentes.</li>
+          <li><strong>Isolamento Multi-Tenant Rigoroso:</strong> Toda chave é vinculada ao seu workspace. Tentativas de acessar recursos de outros workspaces são bloqueadas pelo RBAC com 403 Forbidden.</li>
+        </ul>
+        <pre><code>POST   /api/v1/workspaces/{id}/api-keys       -> Cria chave e retorna segredo bruto
+GET    /api/v1/workspaces/{id}/api-keys       -> Lista chaves registradas (mascaradas)
+DELETE /api/v1/workspaces/{id}/api-keys/{id}  -> Revoga chave de API imediatamente</code></pre>
       </section>
 
       <hr>

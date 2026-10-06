@@ -12,6 +12,7 @@ from src.core.errors import register_exception_handlers
 from src.core.logging import logger, setup_logging
 from src.core.middleware import RequestContextMiddleware
 from src.core.queue import close_queue_pool, init_queue_pool
+from src.slices.apikeys.router import router as apikeys_router
 from src.slices.audit.router import router as audit_router
 from src.slices.auth.router import router as auth_router
 from src.slices.billing.router import router as billing_router
@@ -66,6 +67,7 @@ app.include_router(billing_router, prefix=settings.API_V1_STR)
 app.include_router(audit_router, prefix=settings.API_V1_STR)
 app.include_router(notifications_router, prefix=settings.API_V1_STR)
 app.include_router(webhooks_router, prefix=settings.API_V1_STR)
+app.include_router(apikeys_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Sistema"])
