@@ -290,13 +290,36 @@ async def test_{name}_slice_lifecycle(client: AsyncClient) -> None:
         f.write(test_content)
 
     print(f"✨ Fatia vertical '{name}' criada com sucesso em: {slice_dir}")
-    print(f"👉 Para ativar na API, registre o router em apps/api/src/main.py:")
+    print("👉 Para ativar na API, registre o router em apps/api/src/main.py:")
     print(f"   from src.slices.{name}.router import router as {name}_router")
     print(f"   app.include_router({name}_router, prefix=settings.API_V1_STR)")
+    print("\n💡 Diretriz de Engenharia de IA (Karpathy Guidelines):")
+    print("   1. Defina schemas.py e models.py respeitando os tipos estritos.")
+    print("   2. Implemente a lógica em service.py e exponha rotas em router.py.")
+    print(f"   3. Ajuste os testes gerados em tests/test_{name}_slice.py.")
+    print("   4. Execute 'python tools/scripts/verify.py' para certificar 100% dos guardrails!")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Scaffold de nova fatia vertical no SoftForge")
-    parser.add_argument("--name", required=True, help="Nome da fatia no plural (ex: invoices, customers)")
+    parser.add_argument("--name", help="Nome da fatia no plural (ex: invoices, customers)")
+    parser.add_argument(
+        "--init-ai",
+        action="store_true",
+        help="Inicializa ou atualiza as diretrizes e skills universais de IA (.agents/skills, AGENTS.md, etc.)",
+    )
     args = parser.parse_args()
-    scaffold_slice(args.name)
+
+    if args.init_ai:
+        try:
+            from tools.scripts.init_project_ai import sync_ai_guidelines
+        except ImportError:
+            from init_project_ai import sync_ai_guidelines
+        root_dir = Path(__file__).resolve().parent.parent.parent
+        sync_ai_guidelines(root_dir)
+
+    if args.name:
+        scaffold_slice(args.name)
+    elif not args.init_ai:
+        parser.print_help()
+        sys.exit(1)

@@ -339,15 +339,23 @@ python -m venv apps/api/.venv
       <hr>
 
       <section id="ia">
-        <h1>Fluxo de Desenvolvimento com IA</h1>
+        <h1>Fluxo de Desenvolvimento com IA & Diretrizes Karpathy</h1>
         <div class="card-box">
-          <p><strong>A Constituição do Agente (.ai/AGENTS.md):</strong></p>
-          <p>O arquivo <code>.ai/AGENTS.md</code> na raiz do projeto instrui qualquer IA (Cursor, Antigravity, Claude Code) a nunca quebrar as regras de fatias verticais, nunca misturar modelos de banco com DTOs e sempre rodar o validador de guardrails.</p>
+          <p><strong>A Constituição do Agente (AGENTS.md & .ai/AGENTS.md):</strong></p>
+          <p>O arquivo <code>AGENTS.md</code> na raiz do projeto instrui qualquer IA (Cursor, Antigravity, Claude Code, Copilot, Codex) a nunca quebrar as regras de fatias verticais, nunca misturar modelos de banco com DTOs, seguir os princípios de Andrej Karpathy e sempre rodar o validador de guardrails.</p>
         </div>
+
+        <h2>Os 4 Princípios de Andrej Karpathy para LLMs</h2>
+        <ul>
+          <li><strong>1. Pense Antes de Codificar (Think Before Coding):</strong> Inspecionar schemas, arquivos e modelos antes de propor código; expor trade-offs abertamente; defender a arquitetura do framework e esclarecer dúvidas antes de assumir premissas.</li>
+          <li><strong>2. Simplicidade em Primeiro Lugar (Simplicity First):</strong> Escrever o código mínimo viável; zero abstrações especulativas (sem repositórios genéricos ou fábricas abstratas); preferir fluxos diretos e legíveis.</li>
+          <li><strong>3. Modificações Cirúrgicas (Surgical Changes):</strong> Escopo milimétrico; nunca reformatar ou alterar código/imports fora do seu escopo; preservar comentários e documentações; limpar prints e dados temporários.</li>
+          <li><strong>4. Execução Orientada a Metas e Verificação (Goal-Driven Execution):</strong> Definir critérios objetivos antes de codificar; escrever testes de integração; nunca declarar vitória sem 100% de aprovação no pipeline mestre <code>python tools/scripts/verify.py</code>.</li>
+        </ul>
 
         <h2>O Ciclo Determinístico em 7 Etapas:</h2>
         <ol>
-          <li><strong>Scaffold:</strong> <code>python tools/scripts/slice_scaffold.py --name &lt;fatia&gt;</code></li>
+          <li><strong>Scaffold:</strong> <code>python tools/scripts/slice_scaffold.py --name &lt;fatia&gt;</code> (ou <code>--init-ai</code>)</li>
           <li><strong>Contratos:</strong> Definir entrada e saída em <code>schemas.py</code></li>
           <li><strong>Lógica:</strong> Implementar <code>service.py</code> e rotas em <code>router.py</code></li>
           <li><strong>Testes:</strong> Cobrir com testes assíncronos em <code>tests/</code></li>
@@ -355,6 +363,15 @@ python -m venv apps/api/.venv
           <li><strong>Documentar:</strong> Atualizar guias em <code>docs/</code> e regras em <code>.ai/</code></li>
           <li><strong>Verificar:</strong> <code>python tools/scripts/verify.py</code></li>
         </ol>
+
+        <h2>Suporte Multi-IA Nativo</h2>
+        <ul>
+          <li><strong>Google Antigravity:</strong> <code>.agents/skills/karpathy-guidelines/SKILL.md</code> e <code>.agents/rules/</code></li>
+          <li><strong>Claude Code:</strong> <code>CLAUDE.md</code> na raiz do projeto</li>
+          <li><strong>Cursor & Windsurf:</strong> <code>AGENTS.md</code> e <code>.ai/rules/</code></li>
+          <li><strong>GitHub Copilot:</strong> <code>.github/copilot-instructions.md</code></li>
+          <li><strong>Sincronizador Universal:</strong> <code>python tools/scripts/init_project_ai.py</code></li>
+        </ul>
       </section>
 
       <hr>

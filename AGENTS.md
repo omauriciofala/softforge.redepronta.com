@@ -7,7 +7,7 @@
 
 ## 1. Princípios Inegociáveis (Karpathy-Inspired Core)
 
-Qualquer agente operando no SoftForge DEVE obedecer aos 4 princípios fundamentais de engenharia de software com LLMs (detalhados na Skill [.agents/skills/karpathy-guidelines/SKILL.md](../../.agents/skills/karpathy-guidelines/SKILL.md)):
+Qualquer agente operando no SoftForge DEVE obedecer aos 4 princípios fundamentais de engenharia de software com LLMs (detalhados na Skill [.agents/skills/karpathy-guidelines/SKILL.md](.agents/skills/karpathy-guidelines/SKILL.md)):
 
 1. **Pense Antes de Codificar (Think Before Coding):**
    - Inspecione arquivos, modelos e contratos antes de escrever código.
