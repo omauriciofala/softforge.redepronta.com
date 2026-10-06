@@ -39,9 +39,10 @@ export default defineConfig({
             ],
           },
           {
-            text: "Arquitetura & Engenharia",
+            text: "Arquitetura & Fatias",
             items: [
               { text: "Manual do Framework", link: "/pt-br/02-manual-do-framework" },
+              { text: "Fatia: Billing & Mercado Pago", link: "/pt-br/07-fatia-billing-mercado-pago" },
               { text: "Fluxo com IA (AGENTS.md)", link: "/pt-br/03-fluxo-de-desenvolvimento-com-ia" },
               { text: "Contratos & OpenAPI 3.1", link: "/pt-br/04-contratos-e-openapi" },
             ],
@@ -70,9 +71,10 @@ export default defineConfig({
             ],
           },
           {
-            text: "Architecture & Engineering",
+            text: "Architecture & Slices",
             items: [
               { text: "Framework Manual", link: "/en/02-framework-manual" },
+              { text: "Slice: Billing & Mercado Pago", link: "/en/07-billing-and-payments" },
               { text: "AI Development Workflow", link: "/en/03-ai-development-workflow" },
               { text: "Contracts & OpenAPI 3.1", link: "/en/04-contracts-and-openapi" },
             ],

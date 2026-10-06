@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.database import get_db
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
+from src.slices.billing.dependencies import check_quota
 from src.slices.projects.schemas import (
     PaginatedProjectsResponse,
     ProjectCreate,
@@ -36,6 +37,7 @@ router = APIRouter(prefix="/workspaces/{workspace_id}/projects", tags=["Projetos
     status_code=status.HTTP_201_CREATED,
     summary="Criar novo projeto",
     description="Cria um novo projeto vinculado a um workspace específico. Requer permissão mínima de Membro.",
+    dependencies=[Depends(check_quota("projects"))],
 )
 async def create(
     workspace_id: uuid.UUID,

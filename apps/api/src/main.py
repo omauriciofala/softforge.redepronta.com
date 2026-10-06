@@ -12,6 +12,7 @@ from src.core.errors import register_exception_handlers
 from src.core.logging import logger, setup_logging
 from src.core.middleware import RequestContextMiddleware
 from src.slices.auth.router import router as auth_router
+from src.slices.billing.router import router as billing_router
 from src.slices.projects.router import router as projects_router
 from src.slices.workspaces.router import router as workspaces_router
 
@@ -55,6 +56,7 @@ app.add_middleware(
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(workspaces_router, prefix=settings.API_V1_STR)
 app.include_router(projects_router, prefix=settings.API_V1_STR)
+app.include_router(billing_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Sistema"])
