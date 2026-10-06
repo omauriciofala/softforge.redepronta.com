@@ -41,8 +41,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-.pnpm-store/
-dist/
+apps/web/dist/
+!docs/dist/
 dist-ssr/
 *.local
 
@@ -64,5 +64,4 @@ Thumbs.db
 # Generated Specs & Local artifacts
 apps/api/openapi.json
 apps/web/src/api/generated/
-docs/.vitepress/dist
 docs/.vitepress/cache

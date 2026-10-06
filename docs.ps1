@@ -15,7 +15,7 @@ if (-not (Test-Path "node_modules")) {
     npm.cmd install
 }
 
-if (-not (Test-Path ".vitepress\dist")) {
+if (-not (Test-Path "dist")) {
     Write-Host "[*] Gerando arquivos HTML estaticos com VitePress..." -ForegroundColor Yellow
     npx.cmd vitepress build
 }
@@ -23,5 +23,5 @@ if (-not (Test-Path ".vitepress\dist")) {
 Write-Host "[*] Abrindo documentacao em: http://localhost:5174" -ForegroundColor Green
 Start-Process "http://localhost:5174"
 
-Write-Host "[*] Servindo arquivos HTML estaticos da pasta .vitepress\dist..." -ForegroundColor Green
+Write-Host "[*] Servindo arquivos HTML estaticos da pasta docs\dist..." -ForegroundColor Green
 npx.cmd vitepress preview --port 5174

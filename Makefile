@@ -1,4 +1,4 @@
-.PHONY: help up down restart logs build migrate export-spec codegen test-api test-web test lint typecheck verify scaffold docs
+.PHONY: help up down restart logs build migrate export-spec codegen test-api test-web test lint typecheck verify scaffold docs build-docs
 
 help: ## Exibe a lista de comandos disponíveis
 	@echo "SoftForge — AI-Native Framework"
@@ -59,3 +59,6 @@ scaffold: ## Cria uma nova fatia vertical (ex: make scaffold name=invoices)
 
 docs: ## Inicia o servidor de documentação offline VitePress na porta 5174
 	cd docs && npx vitepress dev --port 5174
+
+build-docs: ## Compila a documentação estática em HTML dentro de docs/dist
+	cd docs && npx vitepress build
