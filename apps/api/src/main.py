@@ -17,6 +17,7 @@ from src.slices.auth.router import router as auth_router
 from src.slices.billing.router import router as billing_router
 from src.slices.notifications.router import router as notifications_router
 from src.slices.projects.router import router as projects_router
+from src.slices.webhooks.router import router as webhooks_router
 from src.slices.workspaces.router import router as workspaces_router
 
 
@@ -64,6 +65,7 @@ app.include_router(projects_router, prefix=settings.API_V1_STR)
 app.include_router(billing_router, prefix=settings.API_V1_STR)
 app.include_router(audit_router, prefix=settings.API_V1_STR)
 app.include_router(notifications_router, prefix=settings.API_V1_STR)
+app.include_router(webhooks_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Sistema"])

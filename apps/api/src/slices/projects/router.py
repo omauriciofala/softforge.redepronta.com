@@ -26,6 +26,7 @@ from src.slices.projects.service import (
     list_projects,
     update_project,
 )
+from src.slices.webhooks.service import trigger_webhook_event
 from src.slices.workspaces.dependencies import require_workspace_role
 from src.slices.workspaces.models import WorkspaceMember, WorkspaceRole
 
@@ -58,6 +59,17 @@ async def create(
         user_id=current_user.id,
         user_email=current_user.email,
         request=request,
+    )
+    await trigger_webhook_event(
+        session=session,
+        workspace_id=workspace_id,
+        event_type="project.created",
+        payload={
+            "project_id": str(project.id),
+            "name": project.name,
+            "created_by": str(current_user.id),
+            "workspace_id": str(workspace_id),
+        },
     )
     return project
 
