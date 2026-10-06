@@ -226,7 +226,8 @@
       <a href="#fatia-invites">14. Fatia: Convites & Membros (RBAC)</a>
       <a href="#fatia-storage">15. Fatia: Storage & Arquivos</a>
       <a href="#fatia-ratelimit">16. Fatia: Rate Limiting & Proteção</a>
-      <a href="#faq">17. FAQ & Troubleshooting</a>
+      <a href="#fatia-features">17. Fatia: Feature Flags & Toggles</a>
+      <a href="#faq">18. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -546,6 +547,28 @@ POST   /api/v1/users/me/avatar                      -> Upload de foto de perfil 
         <pre><code>GET    /api/v1/system/rate-limit                    -> Status e backend do rate limiter
 POST   /api/v1/auth/login     (com Rate Limiting)   -> 60 req/min por IP com headers RFC
 POST   /api/v1/auth/register  (com Rate Limiting)   -> 60 req/min por IP com headers RFC</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-features">
+        <h1>Fatia: Feature Flags & Toggles de Tenant</h1>
+        <p>Lançamento progressivo de recursos, ativação dinâmica de funcionalidades beta e customização granular por Workspace:</p>
+        <ul>
+          <li><strong>Catálogo Global de Flags:</strong> Tabela <code>feature_flags</code> para registro de identificadores chave (slugs como <code>beta_copilot</code>) com status booleano global padrão.</li>
+          <li><strong>Substituições por Workspace (Overrides):</strong> Tabela <code>feature_flag_overrides</code> permitindo que um tenant específico tenha flags ativadas ou desativadas independentemente do padrão global.</li>
+          <li><strong>Avaliação em Requisição Única:</strong> Endpoint <code>GET /api/v1/workspaces/{id}/features</code> retorna o mapa consolidado completo para consumo no frontend.</li>
+          <li><strong>Guarda Declarativa de Rotas:</strong> Injeção da dependência <code>require_feature_flag(key)</code> que bloqueia chamadas não autorizadas com <code>HTTP 403 Forbidden</code> e código <code>FEATURE_FLAG_DISABLED</code>.</li>
+          <li><strong>Trilha de Auditoria:</strong> Criação, edição, exclusão e substituições registradas de forma assíncrona no histórico de auditoria.</li>
+        </ul>
+        <pre><code>GET    /api/v1/system/features                      -> Lista catálogo global de flags
+POST   /api/v1/system/features                      -> Cadastra nova flag de sistema
+PATCH  /api/v1/system/features/{id}                 -> Altera status global da flag
+DELETE /api/v1/system/features/{id}                 -> Exclui flag e overrides associados
+GET    /api/v1/workspaces/{id}/features             -> Retorna mapa avaliado para o workspace
+POST   /api/v1/workspaces/{id}/features/{id}/override -> Força ativação/desativação no tenant
+DELETE /api/v1/workspaces/{id}/features/{id}/override -> Remove substituição local do tenant
+GET    /api/v1/workspaces/{id}/features/demo-guarded -> Endpoint modelo protegido por flag</code></pre>
       </section>
 
       <hr>

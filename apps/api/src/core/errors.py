@@ -75,6 +75,23 @@ class RateLimitExceededException(AppException):
         self.retry_after = retry_after
 
 
+class FeatureFlagDisabledException(AppException):
+    def __init__(
+        self,
+        flag_key: str,
+        message: str | None = None,
+        details: Any = None,
+    ) -> None:
+        msg = message or f"A funcionalidade '{flag_key}' está desabilitada para este workspace."
+        super().__init__(
+            message=msg,
+            status_code=status.HTTP_403_FORBIDDEN,
+            code="FEATURE_FLAG_DISABLED",
+            details=details or {"flag_key": flag_key},
+        )
+        self.flag_key = flag_key
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Registra manipuladores de exceções globais para respostas JSON padronizadas."""
 
