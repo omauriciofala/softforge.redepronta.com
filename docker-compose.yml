@@ -1,0 +1,62 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: softforge-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-softforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-softforge_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-softforge_db}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-softforge} -d ${POSTGRES_DB:-softforge_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: softforge-api
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEBUG: ${DEBUG:-true}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-softforge}:${POSTGRES_PASSWORD:-softforge_secret}@db:5432/${POSTGRES_DB:-softforge_db}
+      SECRET_KEY: ${SECRET_KEY:-softforge-dev-insecure-secret-key-32-chars-minimum!}
+      LOG_LEVEL: ${LOG_LEVEL:-DEBUG}
+      LOG_FORMAT: ${LOG_FORMAT:-colored}
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - ./apps/api:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload
+
+  web:
+    build:
+      context: ./apps/web
+      dockerfile: Dockerfile
+    container_name: softforge-web
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:8000}
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    depends_on:
+      - api
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  pgdata:

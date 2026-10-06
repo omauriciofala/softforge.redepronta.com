@@ -1,0 +1,1 @@
+"""Vertical slices root package."""
