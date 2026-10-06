@@ -20,8 +20,9 @@ Agentes de IA não possuem memória mística sobre decisões passadas: **eles le
 
 2. **Locais Obrigatórios de Atualização:**
    - **Para Agentes de IA:**
-     - `.ai/AGENTS.md`: Quando novas convenções mestras forem criadas.
-     - `.ai/rules/`: Regras especializadas (fatias verticais, contratos, documentação).
+     - `AGENTS.md` (na raiz do repositório): Quando novas convenções mestras forem criadas.
+     - `.agents/rules/`: Regras especializadas (fatias verticais, contratos, documentação, versionamento).
+     - `.agents/skills/`: Procedimentos e runbooks sob demanda.
      - `contracts/openapi.json`: Atualizado via `python tools/scripts/export_openapi.py`.
    - **Para Humanos e Manuais Offline:**
      - `docs/pt-br/` e `docs/en/`: Guias temáticos em Markdown.

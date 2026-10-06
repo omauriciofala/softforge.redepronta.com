@@ -118,7 +118,7 @@ python tools/scripts/export_openapi.py
 
 ### Passo 6: Atualizar Documentação
 - Documente a nova fatia ou alteração nos guias correspondentes (`docs/pt-br/` e `docs/en/`).
-- Atualize `.ai/AGENTS.md` ou `.ai/rules/` caso novas regras arquiteturais tenham sido introduzidas.
+- Atualize `AGENTS.md` ou `.agents/rules/` caso novas regras arquiteturais tenham sido introduzidas.
 - Recompile a documentação estática:
 ```bash
 powershell -ExecutionPolicy Bypass -File docs.ps1

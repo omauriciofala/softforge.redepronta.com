@@ -5,7 +5,7 @@
 
 ---
 
-## 1. The Role of `AGENTS.md` and `.ai/AGENTS.md`
+## 1. The Role of `AGENTS.md` at the Root
 
 When opening this codebase in agentic tools like Cursor, Claude Code, or Google Antigravity, [AGENTS.md](../../AGENTS.md) acts as the **System Constitution**:
 - It dictates architectural rules that the AI must never violate.
@@ -86,7 +86,7 @@ SoftForge provides universal discovery bridges for every major AI coding tool:
 | **Google Antigravity** | `.agents/skills/karpathy-guidelines/SKILL.md` | Canonical progressive on-demand skill |
 | **Google Antigravity & Rules** | `.agents/rules/karpathy-guidelines.md` | Active contextual editing rules |
 | **Claude Code** | `CLAUDE.md` | Root workspace instructions & shortcuts |
-| **Cursor & Windsurf** | `AGENTS.md` and `.ai/rules/` | Master instructions and hierarchical rules |
+| **Cursor & Windsurf** | `AGENTS.md` and `.agents/rules/` | Master instructions and hierarchical rules |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Workspace chat & inline context prompts |
 | **Universal LLMs** | `AGENTS.md` | Root-level system constitution |
 

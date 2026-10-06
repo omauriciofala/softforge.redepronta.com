@@ -5,7 +5,7 @@
 
 ---
 
-## 1. O Papel do `AGENTS.md` e `.ai/AGENTS.md`
+## 1. O Papel do `AGENTS.md` na Raiz
 
 Ao abrir este repositório em ferramentas como Cursor, Claude Code ou Antigravity, o arquivo [AGENTS.md](../../AGENTS.md) funciona como a **Constituição do Projeto** para o modelo de linguagem:
 - Ele define as regras que a IA NUNCA deve quebrar.
@@ -88,7 +88,7 @@ O SoftForge provê pontes de descoberta universais para qualquer assistente de I
 | **Google Antigravity** | `.agents/skills/karpathy-guidelines/SKILL.md` | Skill canônica com carregamento sob demanda |
 | **Google Antigravity & Rules** | `.agents/rules/karpathy-guidelines.md` | Regras ativas em tempo real na edição |
 | **Claude Code** | `CLAUDE.md` | Configuração raiz e atalhos de comando |
-| **Cursor & Windsurf** | `AGENTS.md` e `.ai/rules/` | Instruções mestras e regras hierárquicas |
+| **Cursor & Windsurf** | `AGENTS.md` e `.agents/rules/` | Instruções mestras e regras hierárquicas |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | Prompts de contexto para chat e inline |
 | **LLMs Universais** | `AGENTS.md` | Constituição mestra no topo do repositório |
 

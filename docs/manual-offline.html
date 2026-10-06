@@ -300,7 +300,7 @@ python -m venv apps/api/.venv
             </tr>
             <tr>
               <td><strong>Agentes de IA</strong></td>
-              <td>.ai/AGENTS.md, slice_scaffold.py, export_openapi.py, verify.py</td>
+              <td>AGENTS.md, .agents/, slice_scaffold.py, export_openapi.py, verify.py</td>
               <td>Guardrails determinísticos para Cursor, Antigravity, Copilot e Claude Code.</td>
             </tr>
             <tr>
@@ -342,7 +342,7 @@ python -m venv apps/api/.venv
       <section id="ia">
         <h1>Fluxo de Desenvolvimento com IA & Diretrizes Karpathy</h1>
         <div class="card-box">
-          <p><strong>A Constituição do Agente (AGENTS.md & .ai/AGENTS.md):</strong></p>
+          <p><strong>A Constituição do Agente (AGENTS.md na Raiz):</strong></p>
           <p>O arquivo <code>AGENTS.md</code> na raiz do projeto instrui qualquer IA (Cursor, Antigravity, Claude Code, Copilot, Codex) a nunca quebrar as regras de fatias verticais, nunca misturar modelos de banco com DTOs, seguir os princípios de Andrej Karpathy e sempre rodar o validador de guardrails.</p>
         </div>
 
@@ -361,7 +361,7 @@ python -m venv apps/api/.venv
           <li><strong>Lógica:</strong> Implementar <code>service.py</code> e rotas em <code>router.py</code></li>
           <li><strong>Testes:</strong> Cobrir com testes assíncronos em <code>tests/</code></li>
           <li><strong>Exportar:</strong> <code>python tools/scripts/export_openapi.py</code></li>
-          <li><strong>Documentar:</strong> Atualizar guias em <code>docs/</code> e regras em <code>.ai/</code></li>
+          <li><strong>Documentar:</strong> Atualizar guias em <code>docs/</code> e regras em <code>.agents/rules/</code></li>
           <li><strong>Verificar:</strong> <code>python tools/scripts/verify.py</code></li>
         </ol>
 
@@ -369,7 +369,7 @@ python -m venv apps/api/.venv
         <ul>
           <li><strong>Google Antigravity:</strong> <code>.agents/skills/karpathy-guidelines/SKILL.md</code> e <code>.agents/rules/</code></li>
           <li><strong>Claude Code:</strong> <code>CLAUDE.md</code> na raiz do projeto</li>
-          <li><strong>Cursor & Windsurf:</strong> <code>AGENTS.md</code> e <code>.ai/rules/</code></li>
+          <li><strong>Cursor & Windsurf:</strong> <code>AGENTS.md</code> e <code>.agents/rules/</code></li>
           <li><strong>GitHub Copilot:</strong> <code>.github/copilot-instructions.md</code></li>
           <li><strong>Sincronizador Universal:</strong> <code>python tools/scripts/init_project_ai.py</code></li>
         </ul>

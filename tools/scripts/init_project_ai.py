@@ -26,13 +26,10 @@ def sync_ai_guidelines(target_dir: Path) -> None:
         (".agents/skills/karpathy-guidelines/SKILL.md", target_dir / ".agents" / "skills" / "karpathy-guidelines" / "SKILL.md"),
         (".agents/rules/karpathy-guidelines.md", target_dir / ".agents" / "rules" / "karpathy-guidelines.md"),
         (".agents/rules/versioning-policy.md", target_dir / ".agents" / "rules" / "versioning-policy.md"),
-        (".ai/rules/karpathy-guidelines.md", target_dir / ".ai" / "rules" / "karpathy-guidelines.md"),
-        (".ai/rules/versioning-policy.md", target_dir / ".ai" / "rules" / "versioning-policy.md"),
-        (".ai/rules/documentation-first.md", target_dir / ".ai" / "rules" / "documentation-first.md"),
-        (".ai/rules/openapi-contracts.md", target_dir / ".ai" / "rules" / "openapi-contracts.md"),
-        (".ai/rules/vertical-slices.md", target_dir / ".ai" / "rules" / "vertical-slices.md"),
+        (".agents/rules/documentation-first.md", target_dir / ".agents" / "rules" / "documentation-first.md"),
+        (".agents/rules/openapi-contracts.md", target_dir / ".agents" / "rules" / "openapi-contracts.md"),
+        (".agents/rules/vertical-slices.md", target_dir / ".agents" / "rules" / "vertical-slices.md"),
         ("AGENTS.md", target_dir / "AGENTS.md"),
-        (".ai/AGENTS.md", target_dir / ".ai" / "AGENTS.md"),
         ("CLAUDE.md", target_dir / "CLAUDE.md"),
         (".github/copilot-instructions.md", target_dir / ".github" / "copilot-instructions.md"),
     ]
@@ -51,9 +48,9 @@ def sync_ai_guidelines(target_dir: Path) -> None:
 
     print(f"\n[OK] {copied_count} recursos de IA configurados com sucesso em {target_dir}!")
     print("🤖 Assistentes suportados:")
-    print("   - Google Antigravity (.agents/skills/karpathy-guidelines/SKILL.md)")
+    print("   - Google Antigravity (.agents/skills/ e .agents/rules/)")
     print("   - Claude Code (CLAUDE.md)")
-    print("   - Cursor & Windsurf (AGENTS.md & .ai/rules/)")
+    print("   - Cursor & Windsurf (AGENTS.md & .agents/rules/)")
     print("   - GitHub Copilot (.github/copilot-instructions.md)")
     print("   - Universal Codex & LLMs (AGENTS.md)")
 
