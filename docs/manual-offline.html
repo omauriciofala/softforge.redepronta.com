@@ -229,7 +229,8 @@
       <a href="#fatia-features">17. Fatia: Feature Flags & Toggles</a>
       <a href="#i18n">18. Internacionalização (i18n)</a>
       <a href="#temas">19. Sistema de Temas & Multi-Frontends</a>
-      <a href="#faq">20. FAQ & Troubleshooting</a>
+      <a href="#dashboard">20. Interface & Dashboard Frontend</a>
+      <a href="#faq">21. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -607,6 +608,24 @@ Accept-Language: pt-BR,pt;q=0.9                    -> Solicita respostas em port
 GET    /api/v1/system/themes/{slug}                 -> Retorna manifesto e tokens do tema
 GET    /api/v1/workspaces/{id}/theme                -> Retorna variáveis e branding do tenant
 PATCH  /api/v1/workspaces/{id}/theme                -> Customiza branding do workspace (White-label)</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="dashboard">
+        <h1>Interface Visual & Dashboard Unificado do Frontend</h1>
+        <p>Painel administrativo modular em React 18, Vite e Tailwind CSS integrando todas as fatias verticais do SoftForge:</p>
+        <ul>
+          <li><strong>Projetos & Tarefas:</strong> Criação de projetos, metas de IA, inline quick tasks e status de execução.</li>
+          <li><strong>Billing & Pix Mercado Pago:</strong> Planos Free/Pro/Enterprise, assinatura ativa e modal Pix com QR Code e Copia-e-Cola.</li>
+          <li><strong>Notificações em Tempo Real:</strong> Conexão WebSocket viva (<code>/api/v1/notifications/ws</code>), sino com badge dinâmico e marcação como lidas.</li>
+          <li><strong>Auditoria & Compliance:</strong> Trilha imutável filtrável com busca textual por ação, usuário, IP e timestamp.</li>
+          <li><strong>Webhooks Outbound:</strong> Endpoints cadastrados, alternância de visibilidade do segredo HMAC e histórico de entregas.</li>
+          <li><strong>Chaves de API (PAT):</strong> Criação de chaves M2M com modal de exibição segura única e revogação instantânea.</li>
+          <li><strong>Equipe & Convites RBAC:</strong> Gestão de membros por cargos (Owner, Admin, Member, Viewer) e disparo de links com validade de 7 dias.</li>
+          <li><strong>Storage & Arquivos:</strong> Upload drag-and-drop/seletor, formatação automática em KB/MB e downloads públicos/privados.</li>
+          <li><strong>Temas & White-labeling:</strong> Catálogo de temas instalados, color picker em tempo real com injeção de tokens no <code>:root</code>, logotipo do tenant e editor de CSS.</li>
+        </ul>
       </section>
 
       <hr>

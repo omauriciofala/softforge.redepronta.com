@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { I18nProvider, LanguageSwitcher } from "./core/i18n";
+import { ThemeProvider } from "./core/theme";
 import { AuthProvider, useAuth } from "./features/auth/AuthContext";
 import { AuthForms } from "./features/auth/AuthForms";
+import { DashboardLayout } from "./features/dashboard/DashboardLayout";
 import { DocsViewer } from "./features/docs/DocsViewer";
-import { ProjectDashboard } from "./features/projects/ProjectDashboard";
 import { WorkspaceProvider } from "./features/workspaces/WorkspaceContext";
 
 const queryClient = new QueryClient({
@@ -54,12 +55,21 @@ const AppContent: React.FC = () => {
   }
 
   if (!user) {
-    return <AuthForms onOpenDocs={openDocs} />;
+    return (
+      <div className="relative min-h-screen">
+        <div className="fixed top-4 right-4 z-50">
+          <LanguageSwitcher />
+        </div>
+        <AuthForms onOpenDocs={openDocs} />
+      </div>
+    );
   }
 
   return (
     <WorkspaceProvider>
-      <ProjectDashboard onOpenDocs={openDocs} />
+      <ThemeProvider>
+        <DashboardLayout onOpenDocs={openDocs} />
+      </ThemeProvider>
     </WorkspaceProvider>
   );
 };
@@ -69,12 +79,7 @@ export const App: React.FC = () => {
     <QueryClientProvider client={queryClient}>
       <I18nProvider>
         <AuthProvider>
-          <div className="relative min-h-screen">
-            <div className="fixed top-4 right-4 z-50">
-              <LanguageSwitcher />
-            </div>
-            <AppContent />
-          </div>
+          <AppContent />
         </AuthProvider>
       </I18nProvider>
     </QueryClientProvider>
