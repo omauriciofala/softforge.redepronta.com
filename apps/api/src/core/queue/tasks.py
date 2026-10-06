@@ -58,3 +58,39 @@ async def cleanup_revoked_tokens(ctx: dict[str, Any]) -> dict[str, Any]:
 
     logger.info(f"[Task:cleanup_revoked_tokens] Removidos {deleted_count} tokens expirados/revogados.")
     return {"deleted_count": deleted_count, "executed_at": now.isoformat()}
+
+
+async def record_audit_log_task(
+    ctx: dict[str, Any],
+    workspace_id: str | None = None,
+    user_id: str | None = None,
+    user_email: str | None = None,
+    action: str = "",
+    resource_type: str = "",
+    resource_id: str | None = None,
+    ip_address: str | None = None,
+    user_agent: str | None = None,
+) -> dict[str, Any]:
+    """Tarefa em segundo plano para persistência desacoplada de logs de auditoria."""
+    import uuid
+
+    from src.slices.audit.models import AuditLog
+
+    session_maker = ctx.get("session_maker", AsyncSessionLocal)
+    async with session_maker() as session:
+        log_entry = AuditLog(
+            workspace_id=uuid.UUID(workspace_id) if workspace_id else None,
+            user_id=uuid.UUID(user_id) if user_id else None,
+            user_email=user_email,
+            action=action,
+            resource_type=resource_type,
+            resource_id=str(resource_id) if resource_id else None,
+            ip_address=ip_address,
+            user_agent=user_agent[:255] if user_agent else None,
+        )
+        session.add(log_entry)
+        await session.commit()
+        await session.refresh(log_entry)
+        logger.info(f"[Task:record_audit_log_task] Log registrado [id={log_entry.id}, action={action}]")
+        return {"status": "recorded", "id": str(log_entry.id), "action": action}
+

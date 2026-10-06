@@ -219,7 +219,8 @@
       <a href="#fatia-auth">7. Fatia: Auth & Social OAuth2</a>
       <a href="#fatia-billing">8. Fatia: Billing & Mercado Pago</a>
       <a href="#fatia-workers">9. Fila Assíncrona & Workers (Arq)</a>
-      <a href="#faq">10. FAQ & Troubleshooting</a>
+      <a href="#fatia-audit">10. Fatia: Auditoria & Compliance</a>
+      <a href="#faq">11. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -411,6 +412,21 @@ POST /api/v1/billing/checkout      -> Emissão de cobrança Pix ou Cartão</code
         </ul>
         <pre><code>queue = await get_queue()
 job_id = await queue.enqueue("send_transactional_email", to_email="...", subject="...")</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-audit">
+        <h1>Fatia: Auditoria & Compliance</h1>
+        <p>Trilha imutável de auditoria com despacho desacoplado em segundo plano e rastreabilidade pericial:</p>
+        <ul>
+          <li><strong>Latência Zero no Request:</strong> Disparo assíncrono via Arq Worker com enfileiramento instantâneo no Redis (< 15ms).</li>
+          <li><strong>Imutabilidade Estrita:</strong> Tabela append-only sem coluna <code>updated_at</code> para conformidade com LGPD/GDPR e SOC2.</li>
+          <li><strong>Rastreabilidade de Rede:</strong> Captura de IP real (com headers de proxy reverso) e User-Agent em cada evento.</li>
+          <li><strong>Preservação de Histórico:</strong> E-mail do autor persistido diretamente no registro caso o usuário seja expurgado.</li>
+          <li><strong>Controle RBAC:</strong> Endpoint de consulta restrito a usuários com perfil mínimo de Administrador.</li>
+        </ul>
+        <pre><code>GET /api/v1/workspaces/{workspace_id}/audit-logs -> Lista paginada de eventos</code></pre>
       </section>
 
       <hr>

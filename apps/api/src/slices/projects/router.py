@@ -1,10 +1,11 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Request, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_db
+from src.slices.audit.service import log_audit_event
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
 from src.slices.billing.dependencies import check_quota
@@ -45,9 +46,20 @@ async def create(
     current_user: Annotated[User, Depends(get_current_user)],
     membership: Annotated[WorkspaceMember, Depends(require_workspace_role(WorkspaceRole.MEMBER))],
     session: Annotated[AsyncSession, Depends(get_db)],
+    request: Request = None,
 ) -> ProjectResponse:
     _ = membership
-    return await create_project(session, workspace_id, current_user.id, req)
+    project = await create_project(session, workspace_id, current_user.id, req)
+    await log_audit_event(
+        action="project.created",
+        resource_type="project",
+        resource_id=str(project.id),
+        workspace_id=workspace_id,
+        user_id=current_user.id,
+        user_email=current_user.email,
+        request=request,
+    )
+    return project
 
 
 @router.get(

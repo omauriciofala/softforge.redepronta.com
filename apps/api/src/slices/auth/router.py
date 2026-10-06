@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 from src.core.database import get_db
 from src.core.queue import get_queue
+from src.slices.audit.service import log_audit_event
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
 from src.slices.auth.oauth import get_oauth_provider
@@ -82,11 +83,20 @@ async def register(
 async def login(
     req: UserLoginRequest,
     response: Response,
+    request: Request,
     session: Annotated[AsyncSession, Depends(get_db)],
 ) -> TokenResponse:
     user = await authenticate_user(session, req)
     tokens = await create_tokens_for_user(session, user)
     _set_auth_cookies(response, tokens)
+    await log_audit_event(
+        action="auth.login",
+        resource_type="user",
+        resource_id=str(user.id),
+        user_id=user.id,
+        user_email=user.email,
+        request=request,
+    )
     return tokens
 
 
@@ -185,6 +195,15 @@ async def oauth_callback(
 
     if response:
         _set_auth_cookies(response, tokens)
+
+    await log_audit_event(
+        action="auth.oauth_login",
+        resource_type="user",
+        resource_id=str(user.id),
+        user_id=user.id,
+        user_email=user.email,
+        request=request,
+    )
 
     return OAuthCallbackResponse(
         access_token=tokens.access_token,

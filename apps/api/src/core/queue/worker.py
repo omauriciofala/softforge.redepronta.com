@@ -9,6 +9,7 @@ from src.core.database import AsyncSessionLocal
 from src.core.queue.tasks import (
     cleanup_revoked_tokens,
     process_subscription_renewal,
+    record_audit_log_task,
     send_transactional_email,
 )
 
@@ -29,6 +30,7 @@ class WorkerSettings:
         send_transactional_email,
         process_subscription_renewal,
         cleanup_revoked_tokens,
+        record_audit_log_task,
     ]
 
     # Tarefa cron diária às 03:00 UTC para limpeza de tokens revogados
