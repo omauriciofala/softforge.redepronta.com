@@ -228,7 +228,8 @@
       <a href="#fatia-ratelimit">16. Fatia: Rate Limiting & Proteção</a>
       <a href="#fatia-features">17. Fatia: Feature Flags & Toggles</a>
       <a href="#i18n">18. Internacionalização (i18n)</a>
-      <a href="#faq">19. FAQ & Troubleshooting</a>
+      <a href="#temas">19. Sistema de Temas & Multi-Frontends</a>
+      <a href="#faq">20. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -588,6 +589,23 @@ GET    /api/v1/workspaces/{id}/features/demo-guarded -> Endpoint modelo protegid
         <pre><code>GET    /api/v1/system/i18n                          -> Status do motor i18n e idioma ativo
 Accept-Language: en-US,en;q=0.9                    -> Solicita respostas em inglês
 Accept-Language: pt-BR,pt;q=0.9                    -> Solicita respostas em português</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="temas">
+        <h1>Sistema de Temas & Multi-Frontends Agnósticos</h1>
+        <p>Arquitetura totalmente aberta e desacoplada que permite conectar interfaces em React, Vue, Bootstrap 5 / HTML clássico, Blade/PHP ou HTMX:</p>
+        <ul>
+          <li><strong>Contratos OpenAPI 3.1 como Ponte:</strong> Qualquer frontend consome a mesma API autenticada (JWT via cookies HttpOnly ou header Bearer) sem necessidade de adaptações no backend.</li>
+          <li><strong>Manifesto Padronizado (<code>softforge-theme.json</code>):</strong> Metadados, motor (<code>engine</code>) e tokens declarativos em formato padronizado.</li>
+          <li><strong>Design Tokens Universais:</strong> Variáveis CSS canônicas (<code>--sf-color-primary</code>, <code>--sf-color-bg</code>, <code>--sf-radius</code>) consumíveis diretamente por Tailwind, Bootstrap 5, SCSS ou templates PHP.</li>
+          <li><strong>Diretório Central <code>themes/</code>:</strong> Catálogo de temas e starters plugáveis no monorepo (React, Bootstrap 5, Vue e PHP).</li>
+          <li><strong>White-Labeling por Workspace:</strong> Customização de cor primária, logotipo e CSS personalizado por tenant com resposta em tempo real.</li>
+        </ul>
+        <pre><code>GET    /api/v1/system/themes                        -> Lista catálogo de temas instalados
+GET    /api/v1/workspaces/{id}/theme                -> Retorna variáveis e branding do tenant
+PATCH  /api/v1/workspaces/{id}/theme                -> Customiza branding do workspace (White-label)</code></pre>
       </section>
 
       <hr>
