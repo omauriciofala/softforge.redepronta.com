@@ -220,7 +220,8 @@
       <a href="#fatia-billing">8. Fatia: Billing & Mercado Pago</a>
       <a href="#fatia-workers">9. Fila Assíncrona & Workers (Arq)</a>
       <a href="#fatia-audit">10. Fatia: Auditoria & Compliance</a>
-      <a href="#faq">11. FAQ & Troubleshooting</a>
+      <a href="#fatia-notifications">11. Fatia: Notificações & WebSockets</a>
+      <a href="#faq">12. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -427,6 +428,25 @@ job_id = await queue.enqueue("send_transactional_email", to_email="...", subject
           <li><strong>Controle RBAC:</strong> Endpoint de consulta restrito a usuários com perfil mínimo de Administrador.</li>
         </ul>
         <pre><code>GET /api/v1/workspaces/{workspace_id}/audit-logs -> Lista paginada de eventos</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-notifications">
+        <h1>Fatia: Notificações In-App & WebSockets</h1>
+        <p>Centro de notificações em tempo real com entrega instantânea e sincronização de leituras:</p>
+        <ul>
+          <li><strong>Canal WebSocket Full-Duplex:</strong> Endpoint autenticado via token JWT (<code>/api/v1/notifications/ws?token=...</code>) para entrega imediata sem necessidade de polling contínuo.</li>
+          <li><strong>Gerenciador Multitela:</strong> Suporta múltiplos dispositivos e abas abertas simultaneamente pelo mesmo usuário.</li>
+          <li><strong>Badge Dinâmico:</strong> Endpoint leve <code>/unread-count</code> para alimentar o contador sobre o ícone de sino na barra de navegação.</li>
+          <li><strong>Histórico Persistido:</strong> Armazenamento na tabela <code>notifications</code> com categorias (billing, project, team, system).</li>
+          <li><strong>Operações em Massa:</strong> Marcação de leitura individual (<code>PATCH /{id}/read</code>) e em lote (<code>POST /mark-all-read</code>).</li>
+        </ul>
+        <pre><code>GET   /api/v1/notifications              -> Lista paginada de notificações
+GET   /api/v1/notifications/unread-count -> Total de não lidas para o badge
+PATCH /api/v1/notifications/{id}/read    -> Marca notificação individual como lida
+POST  /api/v1/notifications/mark-all-read-> Limpa todas as pendências em lote
+WS    /api/v1/notifications/ws           -> Streaming em tempo real</code></pre>
       </section>
 
       <hr>
