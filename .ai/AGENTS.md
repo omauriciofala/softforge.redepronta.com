@@ -25,6 +25,10 @@
    - Todo recurso pertencente a uma organização/workspace deve receber o `workspace_id` e ser protegido com `require_workspace_role(...)` em `apps/api/src/slices/workspaces/dependencies.py`.
    - NUNCA execute consultas sem filtrar pelo `workspace_id` adequado.
 
+5. **Documentação Contínua Inegociável (Documentation-First):**
+   - O SoftForge é operado por humanos e Agentes de IA. O que não estiver documentado, para a IA não existe.
+   - Toda implementação de código, novo slice ou alteração de arquitetura DEVE atualizar a documentação (`docs/` e `.ai/`) concomitantemente. A documentação evolui junto com o framework.
+
 ---
 
 ## 2. Anatomia de uma Fatia Vertical (`apps/api/src/slices/<feature>/`)
@@ -45,7 +49,7 @@ apps/api/src/slices/<feature>/
 
 ## 3. Workflow Determinístico para Agentes de IA
 
-Quando solicitado a implementar uma nova funcionalidade, siga rigorosamente estes 6 passos:
+Quando solicitado a implementar uma nova funcionalidade, siga rigorosamente estes 7 passos:
 
 ```mermaid
 graph TD
@@ -53,7 +57,8 @@ graph TD
     Step2 --> Step3["3. Implementar Lógica no Service & Router"]
     Step3 --> Step4["4. Escrever Testes de Integração"]
     Step4 --> Step5["5. Exportar Contratos OpenAPI"]
-    Step5 --> Step6["6. Executar Pipeline de Verificação (verify)"]
+    Step5 --> Step6["6. Atualizar Documentação"]
+    Step6 --> Step7["7. Executar Pipeline de Verificação (verify)"]
 ```
 
 ### Passo 1: Scaffold
@@ -79,7 +84,15 @@ python tools/scripts/slice_scaffold.py --name <nome_da_fatia>
 python tools/scripts/export_openapi.py
 ```
 
-### Passo 6: Verificação de Qualidade
+### Passo 6: Atualizar Documentação
+- Documente a nova fatia ou alteração nos guias correspondentes (`docs/pt-br/` e `docs/en/`).
+- Atualize `.ai/AGENTS.md` ou `.ai/rules/` caso novas regras arquiteturais tenham sido introduzidas.
+- Recompile a documentação estática:
+```bash
+cd docs && npx vitepress build
+```
+
+### Passo 7: Verificação de Qualidade
 - Antes de entregar a resposta ao usuário, rode a suíte de verificação:
 ```bash
 python tools/scripts/verify.py

@@ -61,23 +61,20 @@
       border-radius: 9999px;
       border: 1px solid var(--border);
       color: var(--muted);
-      font-family: monospace;
     }
     .container {
-      max-width: 1200px;
-      margin: 0 auto;
       display: flex;
       min-height: calc(100vh - 65px);
     }
     aside {
       width: 280px;
       border-right: 1px solid var(--border);
-      padding: 2rem 1rem;
+      background: var(--card);
+      padding: 1.5rem;
       position: sticky;
       top: 65px;
       height: calc(100vh - 65px);
       overflow-y: auto;
-      flex-shrink: 0;
     }
     aside h3 {
       font-size: 0.75rem;
@@ -85,7 +82,6 @@
       letter-spacing: 0.05em;
       color: var(--muted);
       margin-bottom: 0.75rem;
-      padding-left: 0.5rem;
     }
     aside a {
       display: block;
@@ -104,7 +100,7 @@
     main {
       flex: 1;
       padding: 3rem 4rem;
-      max-width: 900px;
+      max-width: 960px;
     }
     h1 {
       font-size: 2.25rem;
@@ -172,6 +168,21 @@
       padding: 1.5rem;
       margin-bottom: 1.5rem;
     }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background: var(--card);
+      color: var(--text);
+    }
     hr {
       border: 0;
       border-top: 1px solid var(--border);
@@ -200,11 +211,12 @@
     <aside>
       <h3>Navegação Rápida</h3>
       <a href="#inicio-rapido">1. Guia de Início Rápido</a>
-      <a href="#manual">2. Manual do Framework</a>
-      <a href="#ia">3. Fluxo com IA (AGENTS.md)</a>
-      <a href="#contratos">4. Contratos & OpenAPI 3.1</a>
-      <a href="#faq">5. FAQ & Troubleshooting</a>
-      <a href="#english">6. English Summary</a>
+      <a href="#stack">2. Stack Tecnológica Oficial</a>
+      <a href="#manual">3. Manual do Framework</a>
+      <a href="#ia">4. Fluxo com IA (AGENTS.md)</a>
+      <a href="#doc-rule">5. Regra: Documentação para IA</a>
+      <a href="#contratos">6. Contratos & OpenAPI 3.1</a>
+      <a href="#faq">7. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -219,7 +231,7 @@
         <ul>
           <li><strong>Python 3.12+</strong> (com pip ou uv)</li>
           <li><strong>Node.js 20+</strong> (com npm ou pnpm)</li>
-          <li><strong>Docker e Docker Compose</strong> (opcional para SQLite, obrigatório para Postgres)</li>
+          <li><strong>Docker e Docker Compose</strong> (opcional para SQLite, obrigatório para Postgres em produção)</li>
         </ul>
 
         <h2>2. Inicialização em 3 Passos</h2>
@@ -239,6 +251,50 @@ python -m venv apps/api/.venv
         <h3>Passo 3: Criar uma Nova Fatia em 2 Minutos</h3>
         <pre><code>python tools/scripts/slice_scaffold.py --name invoices</code></pre>
         <p>Esse comando gera schemas Pydantic v2, models SQLAlchemy 2.0 Async, service, router e testes com SQLite in-memory.</p>
+      </section>
+
+      <hr>
+
+      <section id="stack">
+        <h1>Stack Tecnológica Oficial</h1>
+        <p>Cada componente foi escolhido para ter forte tipagem estática e tamanho de contexto ideal para Agentes de IA:</p>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Camada</th>
+              <th>Tecnologias Selecionadas</th>
+              <th>Papel Arquitetural</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Backend</strong></td>
+              <td>Python 3.12+, FastAPI, Pydantic v2, SQLAlchemy 2.0 Async</td>
+              <td>API REST assíncrona de alta performance, tipada e com OpenAPI 3.1 nativo.</td>
+            </tr>
+            <tr>
+              <td><strong>Frontend</strong></td>
+              <td>React 18/19, TypeScript, Vite, Tailwind CSS, shadcn/ui, TanStack Query</td>
+              <td>SPA desacoplada com design system modular, cache de servidor e tipagem ponta a ponta.</td>
+            </tr>
+            <tr>
+              <td><strong>Banco de Dados</strong></td>
+              <td>PostgreSQL 16+ (Produção) / SQLite In-Memory (Testes)</td>
+              <td>Testes rodam em ~2s em memória; produção com ACID e escalabilidade.</td>
+            </tr>
+            <tr>
+              <td><strong>Agentes de IA</strong></td>
+              <td>.ai/AGENTS.md, slice_scaffold.py, export_openapi.py, verify.py</td>
+              <td>Guardrails determinísticos para Cursor, Antigravity, Copilot e Claude Code.</td>
+            </tr>
+            <tr>
+              <td><strong>Documentação</strong></td>
+              <td>VitePress + Minisearch Local + docs.bat + manual-offline.html</td>
+              <td>Documentação viva, bilíngue e com capacidade 100% offline.</td>
+            </tr>
+          </tbody>
+        </table>
       </section>
 
       <hr>
@@ -275,15 +331,26 @@ python -m venv apps/api/.venv
           <p>O arquivo <code>.ai/AGENTS.md</code> na raiz do projeto instrui qualquer IA (Cursor, Antigravity, Claude Code) a nunca quebrar as regras de fatias verticais, nunca misturar modelos de banco com DTOs e sempre rodar o validador de guardrails.</p>
         </div>
 
-        <h2>O Ciclo em 6 Etapas:</h2>
+        <h2>O Ciclo Determinístico em 7 Etapas:</h2>
         <ol>
           <li><strong>Scaffold:</strong> <code>python tools/scripts/slice_scaffold.py --name &lt;fatia&gt;</code></li>
           <li><strong>Contratos:</strong> Definir entrada e saída em <code>schemas.py</code></li>
           <li><strong>Lógica:</strong> Implementar <code>service.py</code> e rotas em <code>router.py</code></li>
           <li><strong>Testes:</strong> Cobrir com testes assíncronos em <code>tests/</code></li>
           <li><strong>Exportar:</strong> <code>python tools/scripts/export_openapi.py</code></li>
+          <li><strong>Documentar:</strong> Atualizar guias em <code>docs/</code> e regras em <code>.ai/</code></li>
           <li><strong>Verificar:</strong> <code>python tools/scripts/verify.py</code></li>
         </ol>
+      </section>
+
+      <hr>
+
+      <section id="doc-rule">
+        <h1>Regra de Ouro: Documentação para IA</h1>
+        <div class="card-box" style="border-left: 4px solid var(--accent);">
+          <p><strong>"Se não está documentado no ecossistema, para a IA não existe."</strong></p>
+          <p>Agentes de IA constroem e operam sistemas lendo documentação em tempo real. Se você alterar ou adicionar código sem documentar na mesma entrega, os próximos agentes sofrerão alucinações e quebrarão convenções. Toda evolução do código acompanha a evolução da documentação.</p>
+        </div>
       </section>
 
       <hr>
@@ -301,11 +368,14 @@ python -m venv apps/api/.venv
 
       <section id="faq">
         <h1>FAQ & Solução de Problemas</h1>
-        <h3>Como iniciar a documentação com busca offline?</h3>
-        <p>Basta dar duplo clique em <code>docs.bat</code> ou executar <code>.\docs.ps1</code> na raiz do repositório. O servidor VitePress será aberto em <code>http://localhost:5174</code>.</p>
 
-        <h3>Posso abrir este arquivo HTML diretamente?</h3>
-        <p><strong>Sim!</strong> Este arquivo (<code>manual-offline.html</code>) possui todos os estilos e estruturas embutidos internamente e pode ser aberto com duplo clique diretamente no Windows Explorer sem precisar de nenhum servidor.</p>
+        <h3>Por que o arquivo <code>docs/dist/index.html</code> abre quebrado/feio ao dar dois cliques?</h3>
+        <p>O VitePress compila o CSS e os scripts JS com caminhos absolutos como <code>/assets/style.css</code>. No protocolo local <code>file:///</code>, o navegador busca na raiz do disco rígido (onde não existem) e bloqueia módulos ES por políticas de segurança CORS.</p>
+        <p><strong>Como resolver:</strong></p>
+        <ul>
+          <li><strong>VitePress com busca e temas:</strong> Dê duplo clique em <code>docs.bat</code> (ou rode <code>.\docs.ps1</code>). Ele abre o site completo em <code>http://localhost:5174</code>.</li>
+          <li><strong>Sem servidor (zero dependências):</strong> Abra este arquivo diretamente (<code>docs/manual-offline.html</code>). Ele funciona 100% nativo em <code>file:///</code>!</li>
+        </ul>
       </section>
     </main>
   </div>

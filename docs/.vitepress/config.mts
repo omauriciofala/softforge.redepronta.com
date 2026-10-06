@@ -26,6 +26,7 @@ export default defineConfig({
         nav: [
           { text: "Início Rápido", link: "/pt-br/01-inicio-rapido" },
           { text: "Manual", link: "/pt-br/02-manual-do-framework" },
+          { text: "Stack Tecnológica", link: "/pt-br/06-stack-tecnologica" },
           { text: "Fluxo com IA", link: "/pt-br/03-fluxo-de-desenvolvimento-com-ia" },
         ],
         sidebar: [
@@ -33,6 +34,7 @@ export default defineConfig({
             text: "Primeiros Passos",
             items: [
               { text: "Guia de Início Rápido", link: "/pt-br/01-inicio-rapido" },
+              { text: "Stack Tecnológica Oficial", link: "/pt-br/06-stack-tecnologica" },
               { text: "FAQ & Solução de Problemas", link: "/pt-br/05-faq-e-troubleshooting" },
             ],
           },
@@ -55,6 +57,7 @@ export default defineConfig({
         nav: [
           { text: "Getting Started", link: "/en/01-getting-started" },
           { text: "Manual", link: "/en/02-framework-manual" },
+          { text: "Tech Stack", link: "/en/06-tech-stack" },
           { text: "AI Workflow", link: "/en/03-ai-development-workflow" },
         ],
         sidebar: [
@@ -62,6 +65,7 @@ export default defineConfig({
             text: "Getting Started",
             items: [
               { text: "Quickstart Guide", link: "/en/01-getting-started" },
+              { text: "Official Tech Stack", link: "/en/06-tech-stack" },
               { text: "FAQ & Troubleshooting", link: "/en/05-faq-and-troubleshooting" },
             ],
           },
