@@ -25,12 +25,29 @@ This updates `apps/api/openapi.json` in milliseconds.
 
 ## 3. Automated Frontend CodeGen (`Orval`)
 
-Running Orval inside `apps/web`:
+SoftForge integrates **Orval** directly into the frontend build and development lifecycle.
+
+### Automatic Execution on `dev` and `build`
+Whenever you run either script in `apps/web/`, Orval is automatically triggered before Vite or TypeScript compilation:
 ```bash
-cd apps/web
+# In development (runs codegen and launches Vite HMR)
+npm run dev
+
+# In production build (runs codegen, runs tsc typecheck, and bundles)
+npm run build
+
+# Or on-demand:
 npm run codegen
 ```
-Produces:
-- TypeScript models in `src/api/generated/models/`.
-- TanStack Query hooks (`useQuery`, `useMutation`) for each backend operation.
-- Axios client integration with automatic HttpOnly cookie credentials.
+
+Orval produces:
+- **Strictly Typed TypeScript Models** in `apps/web/src/api/generated/models/`.
+- **TanStack Query Hooks** (`useQuery`, `useMutation`) for each backend operation with built-in caching and reactive loading/error states.
+- **Configured Axios Client** (`apps/web/src/lib/api-client.ts`) with `withCredentials: true` for HttpOnly cookies and authorization interceptors.
+
+---
+
+## 4. Git Policy & Quality Assurance
+
+- **Ignored in Version Control:** The directory `apps/web/src/api/generated/` is included in `.gitignore` to keep the Git history clean of machine-generated code.
+- **Gatekeeper Validation (`verify.py`):** The script `tools/scripts/verify.py` runs `npm run typecheck`, immediately catching any schema discrepancies between backend and frontend before code is merged.

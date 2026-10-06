@@ -43,12 +43,16 @@ export const DocsViewer: React.FC<DocsViewerProps> = ({ onClose }) => {
       if (line.startsWith("```")) {
         if (inCodeBlock) {
           elements.push(
-            <pre
-              key={`code-${index}`}
-              className="my-4 overflow-x-auto rounded-lg bg-zinc-950 p-4 text-xs font-mono text-zinc-100 border border-zinc-800"
-            >
-              <code>{codeBuffer.join("\n")}</code>
-            </pre>
+            <div key={`code-${index}`} className="relative my-4">
+              {codeLang && (
+                <span className="absolute top-2 right-2 text-[10px] font-mono uppercase text-zinc-400 bg-zinc-800 px-1.5 py-0.5 rounded">
+                  {codeLang}
+                </span>
+              )}
+              <pre className="overflow-x-auto rounded-lg bg-zinc-950 p-4 text-xs font-mono text-zinc-100 border border-zinc-800">
+                <code>{codeBuffer.join("\n")}</code>
+              </pre>
+            </div>
           );
           codeBuffer = [];
           inCodeBlock = false;

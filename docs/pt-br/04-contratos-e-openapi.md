@@ -20,20 +20,35 @@ No SoftForge, o script `tools/scripts/export_openapi.py` extrai a especificaçã
 ```bash
 python tools/scripts/export_openapi.py
 ```
-Isso gera o arquivo `apps/api/openapi.json`.
+Isso gera o arquivo canônico `apps/api/openapi.json`.
 
 ---
 
 ## 3. Geração Automática de Hooks no Frontend (`Orval`)
 
-Com o `openapi.json` gerado, você executa o Orval dentro de `apps/web`:
+O SoftForge integra o **Orval** diretamente ao ciclo de desenvolvimento do frontend. 
+
+### Execução Automática no `dev` e `build`
+Ao rodar qualquer um dos comandos abaixo em `apps/web/`, o Orval é disparado antes de iniciar o servidor ou compilar:
 ```bash
-cd apps/web
+# Durante o desenvolvimento (roda codegen e inicia o Vite)
+npm run dev
+
+# Na compilação de produção (roda codegen, checa tipos com tsc e empacota o build)
+npm run build
+
+# Ou sob demanda:
 npm run codegen
 ```
-O Orval gera:
-- Modelos TypeScript 100% tipados em `apps/web/src/api/generated/models/`.
-- Hooks do TanStack Query (`useQuery`, `useMutation`) para cada endpoint da API.
-- Configuração automática do cliente Axios com cookies HttpOnly e interceptors.
 
-Se o backend alterar o tipo de um campo ou remover um endpoint, o comando `npm run typecheck` no frontend falhará imediatamente no build, prevenindo qualquer bug em produção antes do commit!
+O Orval gera:
+- **Modelos TypeScript 100% tipados** em `apps/web/src/api/generated/models/`.
+- **Hooks do TanStack Query** (`useQuery`, `useMutation`) para cada endpoint da API com gerenciamento automático de cache e estados de loading/error.
+- **Cliente Axios Pré-configurado** (`apps/web/src/lib/api-client.ts`) com envio seguro de cookies `HttpOnly` e interceptors para bearer tokens.
+
+---
+
+## 4. Política de Git & Qualidade Contínua
+
+- **Diretório Ignorado no Git:** A pasta `apps/web/src/api/generated/` está listada no `.gitignore` para manter o histórico de commits limpo e livre de artefatos efêmeros gerados por máquina.
+- **Validação no Pipeline (`verify.py`):** O script `tools/scripts/verify.py` executa o typecheck completo do frontend (`npm run typecheck`), garantindo que qualquer quebra de contrato entre backend e frontend seja detectada imediatamente antes de qualquer entrega ou commit.
