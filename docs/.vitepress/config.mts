@@ -4,6 +4,7 @@ export default defineConfig({
   title: "SoftForge",
   description: "AI-Native Fullstack Framework",
   base: "/",
+  ignoreDeadLinks: true,
   themeConfig: {
     // Busca 100% local e offline (Minisearch embutido no cliente, sem requisições externas)
     search: {

@@ -64,3 +64,5 @@ Thumbs.db
 # Generated Specs & Local artifacts
 apps/api/openapi.json
 apps/web/src/api/generated/
+docs/.vitepress/dist
+docs/.vitepress/cache
