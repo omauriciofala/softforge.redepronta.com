@@ -225,7 +225,8 @@
       <a href="#fatia-apikeys">13. Fatia: Chaves de API & PAT (M2M)</a>
       <a href="#fatia-invites">14. Fatia: Convites & Membros (RBAC)</a>
       <a href="#fatia-storage">15. Fatia: Storage & Arquivos</a>
-      <a href="#faq">16. FAQ & Troubleshooting</a>
+      <a href="#fatia-ratelimit">16. Fatia: Rate Limiting & Proteção</a>
+      <a href="#faq">17. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -527,6 +528,24 @@ GET    /api/v1/workspaces/{id}/storage/files        -> Lista arquivos do workspa
 DELETE /api/v1/workspaces/{id}/storage/files/{id}   -> Exclui arquivo físico e registro
 GET    /api/v1/storage/files/{id}/download          -> Download ou streaming binário
 POST   /api/v1/users/me/avatar                      -> Upload de foto de perfil pública</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="fatia-ratelimit">
+        <h1>Fatia: Rate Limiting & Proteção Contra Abuso</h1>
+        <p>Motor de proteção de tráfego com janelas deslizantes (Sliding Window Log) e fallback resiliente:</p>
+        <ul>
+          <li><strong>Janela Deslizante de Alta Precisão:</strong> Em produção, utiliza Redis Sorted Sets (<code>ZSET</code>) com timestamps em microssegundos para contagem sem anomalias de fronteira.</li>
+          <li><strong>Fallback Graceful para Memória:</strong> Em ambientes offline de desenvolvimento e testes unitários, chaveia automaticamente para <code>MemoryRateLimiter</code> com <code>collections.deque</code>.</li>
+          <li><strong>Cabeçalhos RFC 6585 / IETF:</strong> Emite <code>X-RateLimit-Limit</code>, <code>X-RateLimit-Remaining</code> e <code>X-RateLimit-Reset</code> em todas as respostas controladas.</li>
+          <li><strong>Proteção HTTP 429:</strong> Retorna <code>429 Too Many Requests</code> com o cabeçalho <code>Retry-After</code> especificando os segundos exatos para desbloqueio.</li>
+          <li><strong>Chaves Multi-Critério:</strong> Suporte a limitação por IP do cliente (para rotas públicas como <code>/login</code> e <code>/register</code>), por ID de usuário ou por Workspace Tenant.</li>
+          <li><strong>Diagnóstico de Sistema:</strong> Endpoint <code>GET /api/v1/system/rate-limit</code> para verificação do status do motor e backend ativo.</li>
+        </ul>
+        <pre><code>GET    /api/v1/system/rate-limit                    -> Status e backend do rate limiter
+POST   /api/v1/auth/login     (com Rate Limiting)   -> 60 req/min por IP com headers RFC
+POST   /api/v1/auth/register  (com Rate Limiting)   -> 60 req/min por IP com headers RFC</code></pre>
       </section>
 
       <hr>

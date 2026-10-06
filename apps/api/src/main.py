@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import FastAPI
+from fastapi import Depends, FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.config import settings
@@ -12,6 +12,7 @@ from src.core.errors import register_exception_handlers
 from src.core.logging import logger, setup_logging
 from src.core.middleware import RequestContextMiddleware
 from src.core.queue import close_queue_pool, init_queue_pool
+from src.core.ratelimit import check_rate_limit, get_client_ip
 from src.slices.apikeys.router import router as apikeys_router
 from src.slices.audit.router import router as audit_router
 from src.slices.auth.router import router as auth_router
@@ -82,3 +83,25 @@ async def healthcheck() -> dict[str, Any]:
         "environment": settings.ENVIRONMENT,
         "timestamp": datetime.now(UTC).isoformat(),
     }
+
+
+@app.get(
+    f"{settings.API_V1_STR}/system/rate-limit",
+    tags=["Sistema"],
+    summary="Consultar cota de rate limit",
+    description="Permite que clientes e agentes autônomos de IA consultem sua cota de requisições e IP detectado.",
+    dependencies=[Depends(check_rate_limit(requests=60, window_seconds=60, by="auto", action="system_quota"))],
+)
+async def get_rate_limit_status(
+    request: Request,
+    response: Response,
+) -> dict[str, Any]:
+    client_ip = get_client_ip(request)
+    return {
+        "status": "active",
+        "client_ip": client_ip,
+        "limit": int(response.headers.get("X-RateLimit-Limit", "60")),
+        "remaining": int(response.headers.get("X-RateLimit-Remaining", "59")),
+        "reset_time": int(response.headers.get("X-RateLimit-Reset", "0")),
+    }
+

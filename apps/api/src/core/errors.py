@@ -16,11 +16,13 @@ class AppException(Exception):
         status_code: int = status.HTTP_400_BAD_REQUEST,
         code: str = "BAD_REQUEST",
         details: Any = None,
+        headers: dict[str, str] | None = None,
     ) -> None:
         self.message = message
         self.status_code = status_code
         self.code = code
         self.details = details
+        self.headers = headers or {}
         super().__init__(message)
 
 
@@ -56,6 +58,23 @@ class ForbiddenException(AppException):
         )
 
 
+class RateLimitExceededException(AppException):
+    def __init__(
+        self,
+        message: str = "Limite de requisições excedido. Tente novamente mais tarde.",
+        retry_after: int = 60,
+        details: Any = None,
+    ) -> None:
+        super().__init__(
+            message=message,
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            code="RATE_LIMIT_EXCEEDED",
+            details=details,
+            headers={"Retry-After": str(retry_after)},
+        )
+        self.retry_after = retry_after
+
+
 def register_exception_handlers(app: FastAPI) -> None:
     """Registra manipuladores de exceções globais para respostas JSON padronizadas."""
 
@@ -70,6 +89,7 @@ def register_exception_handlers(app: FastAPI) -> None:
                 "details": exc.details,
                 "request_id": request_id,
             },
+            headers=exc.headers,
         )
 
     @app.exception_handler(RequestValidationError)

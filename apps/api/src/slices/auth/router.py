@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.config import settings
 from src.core.database import get_db
 from src.core.queue import get_queue
+from src.core.ratelimit import check_rate_limit
 from src.slices.audit.service import log_audit_event
 from src.slices.auth.dependencies import get_current_user
 from src.slices.auth.models import User
@@ -58,6 +59,7 @@ def _set_auth_cookies(response: Response, tokens: TokenResponse) -> None:
     status_code=status.HTTP_201_CREATED,
     summary="Registrar novo usuário",
     description="Cria uma nova conta de usuário no sistema e enfileira e-mail de boas-vindas assíncrono.",
+    dependencies=[Depends(check_rate_limit(requests=60, window_seconds=60, by="ip", action="auth_register"))],
 )
 async def register(
     req: UserRegisterRequest,
@@ -79,6 +81,7 @@ async def register(
     response_model=TokenResponse,
     summary="Autenticar usuário",
     description="Valida e-mail e senha, retornando tokens JWT e gravando cookies HttpOnly.",
+    dependencies=[Depends(check_rate_limit(requests=60, window_seconds=60, by="ip", action="auth_login"))],
 )
 async def login(
     req: UserLoginRequest,
