@@ -614,12 +614,12 @@ Accept-Language: pt-BR,pt;q=0.9                    -> Solicita respostas em port
 
       <section id="temas">
         <h1>Sistema de Temas & Multi-Frontends Agnósticos</h1>
-        <p>Arquitetura totalmente aberta e desacoplada que permite conectar interfaces em React, Vue, Bootstrap 5 / HTML clássico, Blade/PHP ou HTMX:</p>
+        <p>Arquitetura totalmente aberta e desacoplada baseada no tema nativo React 18 e extensível para frontends modernos como Vue, Svelte ou micro-frontends:</p>
         <ul>
           <li><strong>Contratos OpenAPI 3.1 como Ponte:</strong> Qualquer frontend consome a mesma API autenticada (JWT via cookies HttpOnly ou header Bearer) sem necessidade de adaptações no backend.</li>
-          <li><strong>Manifesto Padronizado (<code>softforge-theme.json</code>):</strong> Metadados, motor (<code>engine</code>) e tokens declarativos em formato padronizado.</li>
-          <li><strong>Design Tokens Universais:</strong> Variáveis CSS canônicas (<code>--sf-color-primary</code>, <code>--sf-color-bg</code>, <code>--sf-radius</code>) consumíveis diretamente por Tailwind, Bootstrap 5, SCSS ou templates PHP.</li>
-          <li><strong>Diretório Central <code>themes/</code>:</strong> Catálogo de temas e starters plugáveis no monorepo (React, Bootstrap 5, Vue e PHP).</li>
+          <li><strong>Manifesto Padronizado (<code>softforge-theme.json</code>):</strong> Metadados, motor (<code>engine</code>: react, vue, svelte, other) e tokens declarativos em formato padronizado.</li>
+          <li><strong>Design Tokens Universais:</strong> Variáveis CSS canônicas (<code>--sf-color-primary</code>, <code>--sf-color-bg</code>, <code>--sf-radius</code>) consumíveis diretamente por Tailwind, CSS nativo ou qualquer biblioteca visual.</li>
+          <li><strong>Diretório Central <code>themes/</code>:</strong> Catálogo de temas plugáveis no monorepo liderado pela implementação oficial <code>themes/default-react</code>.</li>
           <li><strong>White-Labeling por Workspace:</strong> Customização de cor primária, logotipo e CSS personalizado por tenant com resposta em tempo real.</li>
         </ul>
         <pre><code>GET    /api/v1/system/themes                        -> Lista catálogo de temas instalados

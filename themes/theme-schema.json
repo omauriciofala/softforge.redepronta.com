@@ -31,12 +31,10 @@
       "enum": [
         "react",
         "vue",
-        "html-bootstrap",
-        "php",
         "svelte",
         "other"
       ],
-      "description": "Motor visual ou framework do tema"
+      "description": "Motor visual ou framework moderno do tema"
     },
     "author": {
       "type": "string",

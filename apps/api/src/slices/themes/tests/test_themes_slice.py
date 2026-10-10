@@ -12,24 +12,23 @@ async def test_system_themes_discovery(client: AsyncClient) -> None:
     assert list_resp.status_code == 200
     themes = list_resp.json()
     assert isinstance(themes, list)
-    assert len(themes) >= 2
+    assert len(themes) >= 1
 
     slugs = [t["slug"] for t in themes]
     assert "default-react" in slugs
-    assert "bootstrap-starter" in slugs
 
-    bootstrap_theme = next(t for t in themes if t["slug"] == "bootstrap-starter")
-    assert bootstrap_theme["engine"] == "html-bootstrap"
-    assert "tokens" in bootstrap_theme
-    assert "colors" in bootstrap_theme["tokens"]
+    default_theme = next(t for t in themes if t["slug"] == "default-react")
+    assert default_theme["engine"] == "react"
+    assert "tokens" in default_theme
+    assert "colors" in default_theme["tokens"]
 
     # 2. Obter manifesto detalhado de tema existente
-    get_resp = await client.get("/api/v1/system/themes/bootstrap-starter")
+    get_resp = await client.get("/api/v1/system/themes/default-react")
     assert get_resp.status_code == 200
     detail = get_resp.json()
-    assert detail["name"] == "SoftForge Bootstrap Starter"
-    assert detail["engine"] == "html-bootstrap"
-    assert detail["tokens"]["colors"]["primary"] == "#4f46e5"
+    assert detail["name"] == "SoftForge Default React"
+    assert detail["engine"] == "react"
+    assert detail["tokens"]["colors"]["primary"] == "#2563eb"
 
     # 3. Consultar tema inexistente deve retornar HTTP 404
     not_found_resp = await client.get("/api/v1/system/themes/inexistente-slug-xyz")
@@ -74,13 +73,13 @@ async def test_workspace_theme_lifecycle_and_branding(client: AsyncClient) -> No
     assert "--sf-color-primary" in initial_data["css_variables"]
     assert "--sf-radius" in initial_data["css_variables"]
 
-    # 4. Atualização de White-Labeling (altera slug para bootstrap-starter, cor primária e logo)
+    # 4. Atualização de White-Labeling (altera cor primária, logo, css customizado e override de geometria)
     custom_color = "#ff5500"
     custom_logo = "https://cdn.example.com/logo-client.png"
     update_resp = await client.patch(
         f"/api/v1/workspaces/{workspace_id}/theme",
         json={
-            "theme_slug": "bootstrap-starter",
+            "theme_slug": "default-react",
             "custom_primary_color": custom_color,
             "custom_logo_url": custom_logo,
             "custom_css": "body { letter-spacing: 0.5px; }",
@@ -92,8 +91,8 @@ async def test_workspace_theme_lifecycle_and_branding(client: AsyncClient) -> No
     )
     assert update_resp.status_code == 200
     updated_data = update_resp.json()
-    assert updated_data["theme_slug"] == "bootstrap-starter"
-    assert updated_data["theme_engine"] == "html-bootstrap"
+    assert updated_data["theme_slug"] == "default-react"
+    assert updated_data["theme_engine"] == "react"
     assert updated_data["custom_primary_color"] == custom_color
     assert updated_data["custom_logo_url"] == custom_logo
     assert updated_data["custom_css"] == "body { letter-spacing: 0.5px; }"

@@ -61,7 +61,7 @@ export const ThemesView: React.FC = () => {
           Temas & White-Labeling Agnóstico
         </h2>
         <p className="text-sm text-muted-foreground">
-          Conecte múltiplos motores visuais (React, Bootstrap 5, Vue, PHP) e personalize cores, logo e estilos por tenant.
+          Conecte múltiplos motores visuais (React, Vue, Svelte, micro-frontends) e personalize cores, logo e estilos por tenant.
         </p>
       </div>
 

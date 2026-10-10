@@ -1,12 +1,12 @@
 # Sistema de Temas & Multi-Frontends Agnósticos
 
-> **Arquitetura aberta e desacoplada que permite conectar interfaces em React, Vue, Bootstrap 5 / HTML clássico, Blade/PHP ou HTMX sobre a mesma API e contratos do SoftForge.**
+> **Arquitetura aberta e desacoplada que disponibiliza o Tema Padrão nativo em React 18 / Tailwind e permite conectar qualquer interface moderna (Vue, Svelte, micro-frontends) sobre a mesma API e contratos abertos do SoftForge.**
 
 ---
 
 ## 1. Visão Geral da Arquitetura
 
-O SoftForge não impõe uma única tecnologia de interface. Ele foi concebido para que clientes, desenvolvedores e **agentes autônomos de IA** possam utilizar ou gerar qualquer biblioteca ou framework visual:
+O SoftForge não impõe vendor-lock de interface. Ele foi concebido para que clientes, desenvolvedores e **agentes autônomos de IA** possam utilizar a implementação oficial em React ou plugar qualquer biblioteca ou framework visual moderno:
 
 ```mermaid
 flowchart TD
@@ -16,11 +16,11 @@ flowchart TD
         ThemesAPI["API de Temas (/system/themes & /workspaces/{id}/theme)"]
     end
 
-    subgraph Themes["Diretório de Temas (themes/)"]
-        ReactTheme["themes/default-react (React 18 + Tailwind / Shadcn)"]
-        BootstrapTheme["themes/bootstrap-starter (HTML5 + Bootstrap 5 + JS)"]
-        VueTheme["themes/vue-starter (Vue 3 + Vite)"]
-        PHPTheme["themes/php-starter (PHP / Blade SSR)"]
+    subgraph Themes["Ecossistema de Temas (themes/)"]
+        ReactTheme["themes/default-react (Nativo: React 18 + Tailwind / Shadcn)"]
+        VueTheme["Frontends Plugáveis Vue (engine: vue)"]
+        SvelteTheme["Frontends Plugáveis Svelte (engine: svelte)"]
+        OtherTheme["Micro-frontends / Web Components (engine: other)"]
     end
 
     OAS -->|Consumido por| Themes
@@ -29,42 +29,55 @@ flowchart TD
 ```
 
 ### Princípios de Design
-1. **Contratos OpenAPI 3.1 como Ponte:** Todo frontend (seja uma SPA em React ou uma aplicação em PHP) consome os mesmos endpoints autenticados (JWT em cookies ou header `Authorization: Bearer`).
-2. **Design Tokens Universais (`--sf-*`):** Cores, raios de borda e tipografia são expostos como variáveis CSS nativas que mapeiam naturalmente para Tailwind (`bg-primary`), Bootstrap 5 (`--bs-primary`), CSS puro ou variáveis de templates.
-3. **Manifesto do Tema (`softforge-theme.json`):** Arquivo padrão que descreve o motor (`engine`), metadados e tokens do tema.
+1. **Contratos OpenAPI 3.1 como Ponte:** Todo frontend (seja o tema oficial React ou um aplicativo externo em Vue/Svelte) consome os mesmos endpoints autenticados (JWT via cookies HttpOnly ou header `Authorization: Bearer`).
+2. **Design Tokens Universais (`--sf-*`):** Cores, raios de borda e tipografia são expostos como variáveis CSS nativas que mapeiam naturalmente para Tailwind (`bg-primary`), CSS puro ou variáveis de design systems modernos.
+3. **Manifesto Declarativo (`softforge-theme.json`):** Arquivo padronizado que descreve o motor (`engine`), metadados e tokens do tema.
 4. **White-Labeling por Workspace:** Cada cliente pode ter sua identidade visual (logo, cor primária e CSS customizado) aplicada em tempo real.
 
 ---
 
 ## 2. O Manifesto do Tema (`softforge-theme.json`)
 
-Todo tema localizado no diretório raiz `themes/{nome-do-tema}/` contém um manifesto declarativo:
+Todo tema localizado no diretório raiz `themes/{nome-do-tema}/` contém um manifesto declarativo validado pelo esquema `theme-schema.json`:
 
 ```json
 {
-  "$schema": "./theme-schema.json",
-  "name": "SoftForge Bootstrap Admin",
-  "slug": "bootstrap-starter",
+  "$schema": "../theme-schema.json",
+  "name": "SoftForge Default React",
+  "slug": "default-react",
   "version": "1.0.0",
-  "engine": "html-bootstrap",
-  "author": "SoftForge Team",
-  "description": "Tema clássico de alta compatibilidade construído sobre Bootstrap 5 e Vanilla JS.",
+  "engine": "react",
+  "author": "SoftForge Core Team",
+  "description": "Tema padrão oficial em React 18, Vite, Tailwind CSS e componentes acessíveis Shadcn/UI.",
   "tokens": {
     "colors": {
-      "primary": "#4f46e5",
-      "primary_foreground": "#ffffff",
+      "primary": "#2563eb",
+      "primary_foreground": "#f8fafc",
       "background": "#ffffff",
       "foreground": "#0f172a",
-      "card": "#f8fafc",
+      "card": "#ffffff",
+      "card_foreground": "#0f172a",
       "border": "#e2e8f0",
-      "muted": "#64748b"
+      "muted": "#f1f5f9",
+      "muted_foreground": "#64748b",
+      "accent": "#f1f5f9"
     },
     "typography": {
-      "font_family": "system-ui, -apple-system, sans-serif"
+      "font_family": "Inter, system-ui, -apple-system, sans-serif",
+      "font_size_base": "16px",
+      "line_height": "1.5"
     },
     "geometry": {
       "border_radius": "0.5rem"
     }
+  },
+  "assets": {
+    "stylesheets": [
+      "/src/index.css"
+    ],
+    "scripts": [
+      "/src/main.tsx"
+    ]
   }
 }
 ```
@@ -75,53 +88,42 @@ Todo tema localizado no diretório raiz `themes/{nome-do-tema}/` contém um mani
 
 O SoftForge injeta os tokens no elemento raiz (`:root`) do HTML, permitindo reutilização imediata:
 
-| Token Universal | CSS Variable | Mapeamento Tailwind | Mapeamento Bootstrap 5 |
+| Token Universal | CSS Variable | Mapeamento Tailwind | Aplicação CSS Nativo |
 | :--- | :--- | :--- | :--- |
-| Cor Primária | `--sf-color-primary` | `bg-primary` / `text-primary` | `--bs-primary` / `.btn-primary` |
-| Fundo Geral | `--sf-color-bg` | `bg-background` | `--bs-body-bg` / `bg-body` |
-| Cor do Texto | `--sf-color-text` | `text-foreground` | `--bs-body-color` / `text-body` |
-| Superfície / Card | `--sf-color-card` | `bg-card` | `.card` / `bg-light` |
-| Borda | `--sf-color-border` | `border-border` | `--bs-border-color` |
-| Raio de Borda | `--sf-radius` | `rounded-lg` | `--bs-border-radius` |
+| Cor Primária | `--sf-color-primary` | `bg-primary` / `text-primary` | `var(--sf-color-primary)` |
+| Fundo Geral | `--sf-color-bg` | `bg-background` | `var(--sf-color-bg)` |
+| Cor do Texto | `--sf-color-text` | `text-foreground` | `var(--sf-color-text)` |
+| Superfície / Card | `--sf-color-card` | `bg-card` | `var(--sf-color-card)` |
+| Borda | `--sf-color-border` | `border-border` | `var(--sf-color-border)` |
+| Raio de Borda | `--sf-radius` | `rounded-lg` | `var(--sf-radius)` |
+| Fonte Principal | `--sf-font-family` | `font-sans` | `var(--sf-font-family)` |
 
 ---
 
-## 4. Como Criar um Novo Tema (Passo a Passo)
+## 4. Como Conectar um Novo Frontend ou Tema
 
-### Exemplo: Tema em HTML5 + Bootstrap 5
-1. Crie a pasta em `themes/meu-tema-bootstrap/`.
-2. Adicione o arquivo `softforge-theme.json` com `engine: "html-bootstrap"`.
-3. Crie `index.html` importando o CSS do Bootstrap e as variáveis `--sf-*`:
+A arquitetura Multi-Frontend do SoftForge permite que novas interfaces se integrem sem alterações no núcleo da API:
 
-```html
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard SoftForge</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-  <style>
-    :root {
-      --bs-primary: var(--sf-color-primary, #4f46e5);
-      --bs-border-radius: var(--sf-radius, 0.5rem);
-    }
-  </style>
-</head>
-<body class="bg-light">
-  <div class="container py-5">
-    <h1 class="h3 mb-4">Painel SoftForge (Bootstrap 5)</h1>
-    <div id="projects-container" class="row g-3">
-      <!-- Carregado via fetch('/api/v1/projects') -->
-    </div>
-  </div>
-  <script>
-    fetch('/api/v1/projects', { credentials: 'include' })
-      .then(res => res.json())
-      .then(data => console.log('Projetos carregados:', data));
-  </script>
-</body>
-</html>
-```
+1. **Crie a pasta do tema em `themes/<nome-do-tema>/`**.
+2. **Adicione o arquivo `softforge-theme.json`** especificando o motor (`"react"`, `"vue"`, `"svelte"` ou `"other"`):
+   ```json
+   {
+     "$schema": "../theme-schema.json",
+     "name": "Meu Tema Vue 3",
+     "slug": "meu-tema-vue",
+     "version": "1.0.0",
+     "engine": "vue",
+     "tokens": {
+       "colors": {
+         "primary": "#42b883"
+       }
+     }
+   }
+   ```
+3. **Consuma os endpoints da API SoftForge:**
+   - Obtenha os tokens do tenant via `GET /api/v1/workspaces/{id}/theme`.
+   - Aplique o mapa `css_variables` retornado diretamente no cabeçalho ou elemento `:root` do frontend.
+   - Utilize as rotas padronizadas OpenAPI para gerenciar recursos (`/api/v1/projects`, `/api/v1/auth`, etc.).
 
 ---
 
