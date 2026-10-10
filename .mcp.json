@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "softforge-dev-tasks": {
+      "command": "python",
+      "args": [
+        "tools/scripts/dev_tasks.py",
+        "mcp"
+      ],
+      "description": "SoftForge DevTasks — Gestor nativo de tarefas de desenvolvimento com verificação estrita de guardrails para agentes de IA"
+    }
+  }
+}

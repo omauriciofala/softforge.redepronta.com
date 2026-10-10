@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { LanguageSwitcher } from "@/core/i18n";
 import { useTheme } from "@/core/theme";
 import { useAuth } from "@/features/auth/AuthContext";
@@ -19,10 +20,12 @@ import { StorageView } from "@/features/storage/StorageView";
 import { ThemesView } from "@/features/themes/ThemesView";
 import { WebhooksView } from "@/features/webhooks/WebhooksView";
 import { MembersView } from "@/features/members/MembersView";
+import { DevTasksView } from "@/features/dev_tasks/DevTasksView";
 
 import {
   Bell,
   BookOpen,
+  Bot,
   CreditCard,
   FolderGit2,
   HardDrive,
@@ -37,6 +40,7 @@ import {
 
 export type DashboardTab =
   | "projects"
+  | "dev_tasks"
   | "billing"
   | "notifications"
   | "audit"
@@ -73,6 +77,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
 
   const navItems = [
     { id: "projects", label: "Projetos", icon: FolderGit2 },
+    { id: "dev_tasks", label: "Tarefas de IA", icon: Bot },
     { id: "billing", label: "Billing & Pix", icon: CreditCard },
     { id: "notifications", label: "Notificações", icon: Bell },
     { id: "audit", label: "Auditoria", icon: ShieldCheck },
@@ -87,6 +92,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
     switch (activeTab) {
       case "projects":
         return <ProjectsView />;
+      case "dev_tasks":
+        return <DevTasksView />;
       case "billing":
         return <BillingView />;
       case "notifications":
@@ -289,7 +296,9 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
                 </CardContent>
               </Card>
             ) : (
-              renderActiveView()
+              <ErrorBoundary fallbackTitle="Falha ao carregar visão">
+                {renderActiveView()}
+              </ErrorBoundary>
             )}
           </div>
         </main>

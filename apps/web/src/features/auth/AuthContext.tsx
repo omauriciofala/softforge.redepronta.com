@@ -29,6 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const res = await AXIOS_INSTANCE.get<User>("/api/v1/auth/me");
       setUser(res.data);
     } catch {
+      localStorage.removeItem("softforge_access_token");
       setUser(null);
     } finally {
       setIsLoading(false);

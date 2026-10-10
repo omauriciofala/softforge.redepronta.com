@@ -1,3 +1,4 @@
+import asyncio
 import os
 import uuid
 from typing import Any
@@ -75,7 +76,7 @@ async def init_queue_pool() -> ArqRedis | FakeQueueClient:
 
     try:
         redis_settings = RedisSettings.from_dsn(settings.REDIS_URL)
-        _redis_pool = await create_pool(redis_settings)
+        _redis_pool = await asyncio.wait_for(create_pool(redis_settings), timeout=1.5)
         logger.info(f"[Queue] Conectado com sucesso ao Redis ({settings.REDIS_URL})")
         return ArqQueueClient(_redis_pool)
     except Exception as exc:

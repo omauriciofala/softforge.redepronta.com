@@ -24,6 +24,9 @@ export const AuthForms: React.FC<AuthFormsProps> = ({ onOpenDocs }) => {
     setLoading(true);
 
     try {
+      // Limpa qualquer token residual ou inválido antes da tentativa de login
+      localStorage.removeItem("softforge_access_token");
+
       if (isRegister) {
         await AXIOS_INSTANCE.post("/api/v1/auth/register", {
           email,
@@ -39,12 +42,15 @@ export const AuthForms: React.FC<AuthFormsProps> = ({ onOpenDocs }) => {
       });
 
       const token = loginRes.data.access_token;
+      localStorage.setItem("softforge_access_token", token);
+
       const meRes = await AXIOS_INSTANCE.get<User>("/api/v1/auth/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       login(token, meRes.data);
     } catch (err: any) {
+      localStorage.removeItem("softforge_access_token");
       const msg = err.response?.data?.message || "Ocorreu um erro na autenticação.";
       setError(msg);
     } finally {

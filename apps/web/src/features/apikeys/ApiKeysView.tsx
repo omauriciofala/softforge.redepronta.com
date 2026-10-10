@@ -18,6 +18,11 @@ interface ApiKeyItem {
   created_at: string;
 }
 
+interface ApiKeyListResponse {
+  items: ApiKeyItem[];
+  total: number;
+}
+
 interface NewKeyCreated {
   id: string;
   name: string;
@@ -38,12 +43,19 @@ export const ApiKeysView: React.FC = () => {
     if (!activeWorkspace) return;
     setLoading(true);
     try {
-      const res = await AXIOS_INSTANCE.get<ApiKeyItem[]>(
+      const res = await AXIOS_INSTANCE.get<ApiKeyListResponse | ApiKeyItem[]>(
         `/api/v1/workspaces/${activeWorkspace.id}/api-keys`
       );
-      setKeys(res.data);
+      if (Array.isArray(res.data)) {
+        setKeys(res.data);
+      } else if (res.data && Array.isArray((res.data as ApiKeyListResponse).items)) {
+        setKeys((res.data as ApiKeyListResponse).items);
+      } else {
+        setKeys([]);
+      }
     } catch (err) {
       console.error("Erro ao carregar chaves de API:", err);
+      setKeys([]);
     } finally {
       setLoading(false);
     }
@@ -200,7 +212,7 @@ export const ApiKeysView: React.FC = () => {
                       <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
                     </td>
                   </tr>
-                ) : keys.length === 0 ? (
+                ) : !Array.isArray(keys) || keys.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-muted-foreground">
                       Nenhuma chave de API gerada.
@@ -215,7 +227,7 @@ export const ApiKeysView: React.FC = () => {
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex gap-1">
-                          {k.scopes.map((s) => (
+                          {Array.isArray(k.scopes) && k.scopes.map((s) => (
                             <Badge key={s} variant="outline" className="text-[10px]">
                               {s}
                             </Badge>

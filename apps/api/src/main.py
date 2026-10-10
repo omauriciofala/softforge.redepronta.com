@@ -18,6 +18,7 @@ from src.slices.apikeys.router import router as apikeys_router
 from src.slices.audit.router import router as audit_router
 from src.slices.auth.router import router as auth_router
 from src.slices.billing.router import router as billing_router
+from src.slices.dev_tasks.router import router as dev_tasks_router
 from src.slices.feature_flags.router import router as feature_flags_router
 from src.slices.notifications.router import router as notifications_router
 from src.slices.projects.router import router as projects_router
@@ -33,6 +34,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     logger.info(
         f"Iniciando {settings.PROJECT_NAME} v{settings.VERSION} no ambiente '{settings.ENVIRONMENT}'"
     )
+    if "sqlite" in settings.DATABASE_URL:
+        from src.core.database import Base, discover_and_import_models
+        discover_and_import_models()
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("[Database] Banco SQLite inicializado automaticamente com todas as tabelas.")
     await init_queue_pool()
     yield
     logger.info("Encerrando conexões com fila e banco de dados...")
@@ -76,6 +83,7 @@ app.include_router(apikeys_router, prefix=settings.API_V1_STR)
 app.include_router(storage_router, prefix=settings.API_V1_STR)
 app.include_router(feature_flags_router, prefix=settings.API_V1_STR)
 app.include_router(themes_router, prefix=settings.API_V1_STR)
+app.include_router(dev_tasks_router, prefix=settings.API_V1_STR)
 
 
 @app.get("/health", tags=["Sistema"])

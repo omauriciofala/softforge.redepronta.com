@@ -29,12 +29,19 @@ export const StorageView: React.FC = () => {
     if (!activeWorkspace) return;
     setLoading(true);
     try {
-      const res = await AXIOS_INSTANCE.get<StoredFile[]>(
+      const res = await AXIOS_INSTANCE.get<{ items: StoredFile[]; total: number } | StoredFile[]>(
         `/api/v1/workspaces/${activeWorkspace.id}/storage/files`
       );
-      setFiles(res.data);
+      if (Array.isArray(res.data)) {
+        setFiles(res.data);
+      } else if (res.data && Array.isArray((res.data as any).items)) {
+        setFiles((res.data as any).items);
+      } else {
+        setFiles([]);
+      }
     } catch (err) {
       console.error("Erro ao carregar arquivos:", err);
+      setFiles([]);
     } finally {
       setLoading(false);
     }
@@ -187,7 +194,7 @@ export const StorageView: React.FC = () => {
                       <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent mx-auto" />
                     </td>
                   </tr>
-                ) : files.length === 0 ? (
+                ) : !Array.isArray(files) || files.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-muted-foreground">
                       Nenhum arquivo armazenado neste workspace.

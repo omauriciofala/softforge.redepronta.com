@@ -67,3 +67,9 @@ apps/web/src/api/generated/
 docs/.vitepress/cache
 uploads/
 apps/api/uploads/
+
+# Staging & Reverse Engineering Quarantine (Sistemas Externos em Analise)
+staging/*
+!staging/.gitkeep
+!staging/README.md
+!staging/TEMPLATE_EXTRACTION.md

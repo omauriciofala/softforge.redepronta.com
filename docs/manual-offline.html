@@ -231,7 +231,9 @@
       <a href="#temas">19. Sistema de Temas & Multi-Frontends</a>
       <a href="#dashboard">20. Interface & Dashboard Frontend</a>
       <a href="#versionamento">21. Política de Versionamento (SemVer)</a>
-      <a href="#faq">22. FAQ & Troubleshooting</a>
+      <a href="#fatia-devtasks">22. Fatia: Tarefas de IA & Servidor MCP</a>
+      <a href="#engenharia-reversa">23. Engenharia Reversa & Quarentena</a>
+      <a href="#faq">24. FAQ & Troubleshooting</a>
     </aside>
 
     <main>
@@ -668,6 +670,78 @@ PATCH  /api/v1/workspaces/{id}/theme                -> Customiza branding do wor
         <p>Lançamentos formais são orquestrados deterministicamente pelo script CLI integrado aos guardrails:</p>
         <pre><code>python tools/scripts/release.py --bump minor --tag -m "Nome da Release"</code></pre>
         <p>O script roda <code>verify.py</code> (OpenAPI, Pytest, Alembic SQL, Ruff, TypeScript), sincroniza <code>pyproject.toml</code> e <code>package.json</code>, atualiza o <code>CHANGELOG.md</code> e gera a tag Git anotada.</p>
+      </section>
+
+      <hr>
+
+      <section id="fatia-devtasks">
+        <h1>Fatia: Gestor de Tarefas de Desenvolvimento & Servidor MCP para IA</h1>
+        <blockquote>
+          <strong>Módulo Nativo:</strong> <code>apps/api/src/slices/dev_tasks/</code> • <strong>CLI:</strong> <code>python tools/scripts/dev_tasks.py</code> • <strong>MCP:</strong> JSON-RPC 2.0 nativo sobre stdio • <strong>Filosofia:</strong> Andrej Karpathy Principle 4 (<em>Goal-Driven Execution & Automated Verification</em>).
+        </blockquote>
+
+        <h2>1. Visão Geral & Diferenciais</h2>
+        <p>A fatia DevTasks permite que desenvolvedores humanos e agentes autônomos de IA (Antigravity, Claude Code, Cursor, Windsurf) gerenciem o ciclo técnico de trabalho:</p>
+        <ul>
+          <li><strong>Arquivos-alvo (<code>target_files</code>):</strong> Delimitação precisa dos arquivos tocados.</li>
+          <li><strong>Critérios de aceite (<code>acceptance_criteria</code>):</strong> Condições formais de aprovação.</li>
+          <li><strong>Comando de verificação (<code>verification_command</code>):</strong> Guardrail executável (Pytest, verify.py, linters).</li>
+          <li><strong>Histórico de notas técnicas (<code>notes</code>):</strong> Registro de progresso, decisões de design e bloqueios.</li>
+          <li><strong>Acesso Direto ao Banco (Zero Dependência de Uvicorn):</strong> O CLI e o servidor MCP acessam o banco diretamente via SQLAlchemy assíncrono, operando mesmo sem servidor HTTP ativo.</li>
+        </ul>
+
+        <h2>2. Guardrail de Verificação Estrita</h2>
+        <p>Ao solicitar a conclusão de uma tarefa, o comando configurado em <code>verification_command</code> é disparado em subprocesso isolado. Se o código de saída for diferente de zero, a tarefa <strong>NÃO</strong> é concluída e o erro é registrado no log da tarefa.</p>
+
+        <h2>3. Servidor MCP e Comandos CLI</h2>
+        <pre><code># Servidor MCP nativo (JSON-RPC 2.0 sobre stdio)
+python tools/scripts/dev_tasks.py mcp
+
+# Listar tarefas pendentes
+python tools/scripts/dev_tasks.py list --status todo
+
+# Criar nova tarefa técnica com comando de verificação
+python tools/scripts/dev_tasks.py create \
+  --title "Implementar autenticação WebAuthn" \
+  --target-files "apps/api/src/slices/auth/passkeys.py" \
+  --criteria "Passar no teste unitário" \
+  --verify-cmd "pytest apps/api/src/slices/auth/tests/test_passkeys.py"
+
+# Concluir tarefa (executa o comando de verificação automaticamente)
+python tools/scripts/dev_tasks.py complete &lt;TASK_ID&gt; --summary "Implementação aprovada pelos guardrails."</code></pre>
+
+        <h2>4. Endpoints REST da Fatia</h2>
+        <pre><code>GET    /api/v1/workspaces/{id}/dev-tasks            -> Lista tarefas técnicas do workspace
+POST   /api/v1/workspaces/{id}/dev-tasks            -> Cria nova tarefa de desenvolvimento
+GET    /api/v1/workspaces/{id}/dev-tasks/{task_id}  -> Detalha tarefa, arquivos, critérios e notas
+PATCH  /api/v1/workspaces/{id}/dev-tasks/{task_id}  -> Atualiza status, notas ou atribuição de agente
+POST   /api/v1/workspaces/{id}/dev-tasks/{task_id}/complete -> Conclusão com validação estrita</code></pre>
+      </section>
+
+      <hr>
+
+      <section id="engenharia-reversa">
+        <h1>Engenharia Reversa e Migração Segura de Legados</h1>
+        <blockquote>
+          <strong>Área de Quarentena:</strong> <code>staging/</code> (ignorado pelo Git) • <strong>Assistente CLI:</strong> <code>python tools/scripts/reverse_engineering.py</code> • <strong>Princípio:</strong> Extração Pura de Funcionalidade (Zero Contaminação).
+        </blockquote>
+
+        <h2>1. Princípios Inegociáveis</h2>
+        <ul>
+          <li><strong>Quarentena Total (Zero Lixo):</strong> Nenhum repositório externo ou arquivo legado entra diretamente em <code>apps/api/</code> ou <code>apps/web/</code>. Todo código para análise reside na pasta <code>staging/&lt;nome-do-sistema&gt;/</code> protegida pelo <code>.gitignore</code>.</li>
+          <li><strong>Extração Pura de Funcionalidade:</strong> Não portamos código linha por linha nem instalamos bibliotecas legadas (Django ORM, Express, TypeORM). Extraímos apenas modelos conceituais, regras de cálculo e contratos, recriando-os nativamente em FastAPI + SQLAlchemy 2.0 assíncrono.</li>
+          <li><strong>Preservação Rígida do Design System:</strong> Proibição absoluta de cópia de arquivos CSS legados, frameworks antigos ou bibliotecas estranhas. As telas são montadas do zero com Tailwind CSS, Radix UI e Shadcn.</li>
+        </ul>
+
+        <h2>2. Ciclo de Migração com o CLI</h2>
+        <pre><code># 1. Inicializar área de quarentena e roteiro de extração
+python tools/scripts/reverse_engineering.py init --name crm-antigo
+
+# 2. Listar sistemas em análise
+python tools/scripts/reverse_engineering.py list
+
+# 3. Auditar conformidade da fatia implementada contra regras do SoftForge
+python tools/scripts/reverse_engineering.py audit --slice crm_migrado</code></pre>
       </section>
 
       <hr>

@@ -50,7 +50,7 @@ export const NotificationBell: React.FC<NotificationBellProps> = ({ onOpenFullVi
     if (!token) return;
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const host = window.location.host.includes(":5173") ? "localhost:8000" : window.location.host;
+    const host = window.location.host;
     const wsUrl = `${protocol}//${host}/api/v1/notifications/ws?token=${token}`;
 
     let ws: WebSocket | null = null;

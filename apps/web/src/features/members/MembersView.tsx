@@ -42,15 +42,23 @@ export const MembersView: React.FC = () => {
     setLoading(true);
     try {
       const [membersRes, invitesRes] = await Promise.all([
-        AXIOS_INSTANCE.get<Member[]>(`/api/v1/workspaces/${activeWorkspace.id}/members`),
-        AXIOS_INSTANCE.get<Invite[]>(`/api/v1/workspaces/${activeWorkspace.id}/invites`).catch(
+        AXIOS_INSTANCE.get<Member[] | { items: Member[] }>(`/api/v1/workspaces/${activeWorkspace.id}/members`),
+        AXIOS_INSTANCE.get<Invite[] | { items: Invite[] }>(`/api/v1/workspaces/${activeWorkspace.id}/invites`).catch(
           () => ({ data: [] })
         ),
       ]);
-      setMembers(membersRes.data);
-      setInvites(invitesRes.data);
+      const membersData = Array.isArray(membersRes.data)
+        ? membersRes.data
+        : (membersRes.data as any)?.items || [];
+      const invitesData = Array.isArray(invitesRes.data)
+        ? invitesRes.data
+        : (invitesRes.data as any)?.items || [];
+      setMembers(membersData);
+      setInvites(invitesData);
     } catch (err) {
       console.error("Erro ao carregar membros do workspace:", err);
+      setMembers([]);
+      setInvites([]);
     } finally {
       setLoading(false);
     }

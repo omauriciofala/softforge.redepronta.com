@@ -139,3 +139,31 @@ python tools/scripts/verify.py
   - `ForbiddenException("Permissão insuficiente")` -> Retorna 403
   - `AppException("Regra de negócio violada", status_code=400)` -> Retorna 400
 - Toda resposta de erro inclui automaticamente o `request_id` para correlação e auditoria.
+
+---
+
+## 6. Engenharia Reversa e Migração Segura (Zero Contaminação de Stack e UI)
+
+Ao incorporar funcionalidades de sistemas existentes ou repositórios legados:
+
+1. **Quarentena Estrita em `staging/`:**
+   - Todo repositório externo deve residir em `staging/<nome_do_sistema>/` (ignorado por `.gitignore`).
+   - Inicialize a frente de análise com:
+     ```bash
+     python tools/scripts/reverse_engineering.py init --name <nome_do_sistema>
+     ```
+   - Preencha o arquivo `EXTRACTION_SPEC.md` mapeando entidades, regras e contratos antes de codificar.
+
+2. **Extração Pura de Funcionalidade (Zero Lixo & Zero Cópia de Código):**
+   - Extraia exclusivamente **regras de negócio**, **modelos conceituais de dados**, **rotas/contratos** e **jornadas do usuário**.
+   - NUNCA copie ou instale frameworks ou bibliotecas legadas (Django, Flask, Express, Prisma, TypeORM).
+
+3. **Preservação Rígida do Design System:**
+   - NUNCA copie CSS, Bootstrap, Materialize, HTML legado ou estilos inline.
+   - Toda a UI deve ser criada em `apps/web/src/features/<fatia>/` com Tailwind CSS, componentes de `apps/web/src/components/ui/` e ícones `lucide-react`.
+
+4. **Auditoria Obrigatória da Fatia:**
+   - Valide o isolamento arquitetural antes de finalizar:
+     ```bash
+     python tools/scripts/reverse_engineering.py audit --slice <nome_da_fatia>
+     ```
