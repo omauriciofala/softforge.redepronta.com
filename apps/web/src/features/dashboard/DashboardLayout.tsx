@@ -22,21 +22,25 @@ import { WebhooksView } from "@/features/webhooks/WebhooksView";
 import { MembersView } from "@/features/members/MembersView";
 import { DevTasksView } from "@/features/dev_tasks/DevTasksView";
 
+// Icones oficiais do Tabler
 import {
-  Bell,
-  BookOpen,
-  Bot,
-  CreditCard,
-  FolderGit2,
-  HardDrive,
-  Key,
-  LogOut,
-  Palette,
-  Plus,
-  ShieldCheck,
-  Users,
-  Webhook,
-} from "lucide-react";
+  IconBook,
+  IconChevronRight,
+  IconCreditCard,
+  IconDatabase,
+  IconFolders,
+  IconKey,
+  IconLogout,
+  IconMoon,
+  IconPalette,
+  IconPlus,
+  IconRobot,
+  IconSearch,
+  IconShieldCheck,
+  IconSun,
+  IconUsers,
+  IconWebhook,
+} from "@tabler/icons-react";
 
 export type DashboardTab =
   | "projects"
@@ -62,6 +66,22 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
   const [activeTab, setActiveTab] = useState<DashboardTab>("projects");
   const [isCreatingWs, setIsCreatingWs] = useState(false);
   const [newWsName, setNewWsName] = useState("");
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== "undefined") {
+      return document.documentElement.classList.contains("dark");
+    }
+    return false;
+  });
+
+  const toggleDarkMode = () => {
+    const next = !isDark;
+    setIsDark(next);
+    if (next) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  };
 
   const handleCreateWorkspace = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,16 +96,15 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
   };
 
   const navItems = [
-    { id: "projects", label: "Projetos", icon: FolderGit2 },
-    { id: "dev_tasks", label: "Tarefas de IA", icon: Bot },
-    { id: "billing", label: "Billing & Pix", icon: CreditCard },
-    { id: "notifications", label: "Notificações", icon: Bell },
-    { id: "audit", label: "Auditoria", icon: ShieldCheck },
-    { id: "webhooks", label: "Webhooks", icon: Webhook },
-    { id: "apikeys", label: "Chaves de API", icon: Key },
-    { id: "members", label: "Equipe & RBAC", icon: Users },
-    { id: "storage", label: "Arquivos & Storage", icon: HardDrive },
-    { id: "themes", label: "Temas & Cores", icon: Palette },
+    { id: "projects", label: "Projetos", icon: IconFolders },
+    { id: "dev_tasks", label: "Tarefas de IA", icon: IconRobot },
+    { id: "billing", label: "Billing & Pix", icon: IconCreditCard },
+    { id: "audit", label: "Auditoria", icon: IconShieldCheck },
+    { id: "webhooks", label: "Webhooks", icon: IconWebhook },
+    { id: "apikeys", label: "Chaves de API", icon: IconKey },
+    { id: "members", label: "Equipe & RBAC", icon: IconUsers },
+    { id: "storage", label: "Arquivos & Storage", icon: IconDatabase },
+    { id: "themes", label: "Temas & Cores", icon: IconPalette },
   ];
 
   const renderActiveView = () => {
@@ -115,46 +134,62 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
     }
   };
 
+  const currentNav = navItems.find((n) => n.id === activeTab);
+  const userInitials = user?.full_name
+    ? user.full_name
+        .split(" ")
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase()
+    : "U";
+
   return (
-    <div className="flex h-screen bg-background text-foreground overflow-hidden">
-      {/* Sidebar Navigation */}
-      <aside className="w-64 border-r bg-card flex flex-col justify-between shrink-0 shadow-sm z-20">
+    <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans">
+      {/* Sidebar Navigation - Estilo Tabler */}
+      <aside className="w-64 border-r border-border bg-card flex flex-col justify-between shrink-0 shadow-sm z-20">
         <div className="flex flex-col h-full overflow-hidden">
           {/* Brand Header */}
-          <div className="p-4 border-b flex items-center justify-between">
-            <div className="flex items-center gap-2 truncate">
+          <div className="h-16 px-4 border-b border-border flex items-center justify-between">
+            <div className="flex items-center gap-2.5 truncate">
               {activeTheme?.custom_logo_url ? (
                 <img
                   src={activeTheme.custom_logo_url}
                   alt="Logo Tenant"
-                  className="h-7 w-7 object-contain rounded"
+                  className="h-8 w-8 object-contain rounded-md"
                 />
               ) : (
-                <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black text-sm shrink-0 shadow">
+                <div className="h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
                   ⚡
                 </div>
               )}
-              <span className="font-extrabold text-base tracking-tight truncate">
-                {activeTheme?.theme_name ? activeTheme.theme_name.split(" ")[0] : "SoftForge"}
-              </span>
+              <div className="flex flex-col leading-tight truncate">
+                <span className="font-bold text-sm tracking-tight truncate">
+                  {activeTheme?.theme_name ? activeTheme.theme_name.split(" ")[0] : "SoftForge"}
+                </span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
+                  Dashboard
+                </span>
+              </div>
             </div>
-            <Badge variant="outline" className="text-[10px] uppercase font-mono shrink-0">
-              {activeTheme?.theme_engine || "react"}
+            <Badge variant="outline" className="text-[10px] font-mono px-1.5 py-0 border-border text-muted-foreground">
+              {activeTheme?.theme_engine || "tabler"}
             </Badge>
           </div>
 
-          {/* Workspace Switcher */}
-          <div className="p-3 border-b bg-muted/20">
+          {/* Workspace Switcher - Tabler Styled */}
+          <div className="p-3 border-b border-border bg-muted/30">
             <div className="flex items-center justify-between mb-1.5">
-              <span className="text-[11px] font-semibold uppercase text-muted-foreground">Workspace</span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-5 px-1 text-[11px] text-primary"
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Workspace
+              </span>
+              <button
+                type="button"
+                className="flex items-center gap-0.5 text-[11px] font-semibold text-primary hover:underline"
                 onClick={() => setIsCreatingWs(!isCreatingWs)}
               >
-                <Plus className="h-3 w-3 mr-0.5" /> Novo
-              </Button>
+                <IconPlus size={12} stroke={2} /> Novo
+              </button>
             </div>
 
             {isCreatingWs ? (
@@ -163,7 +198,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
                   placeholder="Nome do Tenant..."
                   value={newWsName}
                   onChange={(e) => setNewWsName(e.target.value)}
-                  className="h-7 text-xs"
+                  className="h-7 text-xs bg-background"
                   autoFocus
                 />
                 <div className="flex gap-1">
@@ -177,7 +212,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
                     className="h-6 text-[10px]"
                     onClick={() => setIsCreatingWs(false)}
                   >
-                    X
+                    Cancelar
                   </Button>
                 </div>
               </form>
@@ -188,7 +223,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
                   const ws = workspaces.find((w) => w.id === e.target.value);
                   if (ws) setActiveWorkspace(ws);
                 }}
-                className="w-full bg-background border rounded px-2 py-1.5 text-xs font-medium focus:ring-1 focus:ring-primary focus:outline-none truncate"
+                className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-xs font-medium focus:ring-1 focus:ring-primary focus:outline-none truncate shadow-sm transition-colors"
               >
                 {workspaces.map((ws) => (
                   <option key={ws.id} value={ws.id}>
@@ -201,8 +236,11 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
             )}
           </div>
 
-          {/* Navigation Items */}
-          <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+          {/* Navigation Items - Estilo Tabler (com indicador lateral) */}
+          <nav className="flex-1 overflow-y-auto px-2 py-3 space-y-1">
+            <div className="px-2 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+              Navegação
+            </div>
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = activeTab === item.id;
@@ -210,13 +248,19 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id as DashboardTab)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left ${
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-xs transition-all text-left group ${
                     isActive
-                      ? "bg-primary text-primary-foreground shadow-sm font-semibold"
-                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                      ? "bg-primary/10 text-primary font-semibold border-l-2 border-primary shadow-2xs"
+                      : "text-muted-foreground hover:bg-muted/70 hover:text-foreground"
                   }`}
                 >
-                  <Icon className="h-4 w-4 shrink-0" />
+                  <Icon
+                    size={18}
+                    stroke={isActive ? 2 : 1.5}
+                    className={`shrink-0 transition-transform ${
+                      isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    }`}
+                  />
                   <span className="truncate">{item.label}</span>
                 </button>
               );
@@ -224,33 +268,39 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
           </nav>
         </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-3 border-t bg-muted/10 space-y-2">
+        {/* Sidebar Footer - Perfil e Ações */}
+        <div className="p-3 border-t border-border bg-muted/20 space-y-2.5">
           {onOpenDocs && (
             <Button
               variant="outline"
               size="sm"
               onClick={onOpenDocs}
-              className="w-full justify-start gap-2 text-xs h-8"
+              className="w-full justify-start gap-2 text-xs h-8 border-border bg-background shadow-2xs hover:bg-muted"
             >
-              <BookOpen className="h-3.5 w-3.5" />
-              Documentação OpenAPI
+              <IconBook size={15} stroke={1.5} />
+              <span>Documentação OpenAPI</span>
             </Button>
           )}
 
+          {/* User Info & Quick Logout */}
           <div className="flex items-center justify-between pt-1">
-            <div className="truncate mr-2">
-              <p className="text-xs font-semibold truncate">{user?.full_name}</p>
-              <p className="text-[10px] text-muted-foreground truncate">{user?.email}</p>
+            <div className="flex items-center gap-2 truncate mr-2">
+              <div className="h-7 w-7 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center shrink-0 border border-primary/20">
+                {userInitials}
+              </div>
+              <div className="truncate">
+                <p className="text-xs font-semibold truncate leading-tight">{user?.full_name}</p>
+                <p className="text-[10px] text-muted-foreground truncate leading-tight">{user?.email}</p>
+              </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
               onClick={logout}
-              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
               title="Encerrar Sessão"
             >
-              <LogOut className="h-4 w-4" />
+              <IconLogout size={16} stroke={1.5} />
             </Button>
           </div>
         </div>
@@ -258,41 +308,64 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ onOpenDocs }) 
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        {/* Topbar */}
-        <header className="h-14 border-b bg-card px-6 flex items-center justify-between shrink-0 shadow-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold capitalize text-foreground">
-              {navItems.find((n) => n.id === activeTab)?.label}
+        {/* Topbar - Estilo Tabler */}
+        <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between shrink-0 shadow-2xs">
+          {/* Breadcrumb / Title */}
+          <div className="flex items-center gap-2 text-xs">
+            <span className="text-muted-foreground font-medium">Dashboard</span>
+            <IconChevronRight size={14} className="text-muted-foreground" stroke={1.5} />
+            <span className="font-semibold text-foreground">
+              {currentNav?.label || "Geral"}
             </span>
             {activeWorkspace && (
-              <>
-                <span className="text-muted-foreground text-xs">/</span>
-                <span className="text-xs text-muted-foreground font-mono bg-muted px-1.5 py-0.5 rounded">
-                  {activeWorkspace.name}
-                </span>
-              </>
+              <span className="ml-2 font-mono text-[10px] bg-muted text-muted-foreground px-2 py-0.5 rounded-full border border-border">
+                {activeWorkspace.name}
+              </span>
             )}
           </div>
 
+          {/* Quick Search & Actions */}
           <div className="flex items-center gap-3">
+            {/* Search Pill - Tabler Style */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/40 border border-border text-xs text-muted-foreground">
+              <IconSearch size={14} stroke={1.5} />
+              <span className="text-muted-foreground">Buscar rápido...</span>
+              <kbd className="ml-2 px-1.5 py-0.2 bg-background border border-border rounded text-[10px] font-mono text-muted-foreground shadow-2xs">
+                ⌘K
+              </kbd>
+            </div>
+
+            {/* Alternador Claro / Escuro */}
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+              onClick={toggleDarkMode}
+              title={isDark ? "Alternar para modo claro" : "Alternar para modo escuro"}
+            >
+              {isDark ? <IconSun size={17} stroke={1.5} /> : <IconMoon size={17} stroke={1.5} />}
+            </Button>
+
             <LanguageSwitcher />
             <NotificationBell onOpenFullView={() => setActiveTab("notifications")} />
           </div>
         </header>
 
         {/* Dynamic Body */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-6xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-6 bg-background">
+          <div className="max-w-6xl mx-auto space-y-6">
             {!activeWorkspace ? (
-              <Card className="text-center py-16">
+              <Card className="text-center py-16 border-border shadow-sm">
                 <CardHeader>
-                  <CardTitle className="text-xl">Nenhum Workspace Selecionado</CardTitle>
+                  <CardTitle className="text-xl font-bold">Nenhum Workspace Selecionado</CardTitle>
                   <CardDescription>
                     Crie ou selecione um tenant na barra lateral para começar a gerenciar sua aplicação.
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button onClick={() => setIsCreatingWs(true)}>+ Criar Workspace</Button>
+                  <Button onClick={() => setIsCreatingWs(true)} className="gap-1.5 shadow-sm">
+                    <IconPlus size={16} stroke={2} /> Criar Workspace
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
