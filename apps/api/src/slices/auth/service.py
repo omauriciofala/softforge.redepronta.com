@@ -185,3 +185,24 @@ async def refresh_tokens(session: AsyncSession, refresh_token_str: str) -> Token
         raise UnauthorizedException(message="Usuário inexistente ou inativo")
 
     return await create_tokens_for_user(session, user)
+
+
+async def revoke_refresh_token(session: AsyncSession, refresh_token_str: str) -> bool:
+    """Invalida explicitamente um refresh token no banco de dados (logout ou encerramento de sessão)."""
+    try:
+        token_hash = _hash_token(refresh_token_str)
+        result = await session.execute(
+            select(RefreshToken).where(
+                RefreshToken.token_hash == token_hash,
+                RefreshToken.revoked.is_(False),
+            )
+        )
+        token_record = result.scalar_one_or_none()
+        if token_record:
+            token_record.revoked = True
+            await session.commit()
+            return True
+        return False
+    except Exception:
+        return False
+

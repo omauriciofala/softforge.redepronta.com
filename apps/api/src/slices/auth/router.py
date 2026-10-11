@@ -27,6 +27,7 @@ from src.slices.auth.service import (
     create_tokens_for_user,
     create_user,
     refresh_tokens,
+    revoke_refresh_token,
 )
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
@@ -123,9 +124,21 @@ async def refresh(
     "/logout",
     status_code=status.HTTP_200_OK,
     summary="Encerrar sessão",
-    description="Limpa os cookies de autenticação do navegador.",
+    description="Invalida o refresh token no banco de dados e limpa os cookies de autenticação do navegador.",
 )
-async def logout(response: Response) -> dict[str, str]:
+async def logout(
+    request: Request,
+    response: Response,
+    session: Annotated[AsyncSession, Depends(get_db)],
+    body: RefreshTokenRequest | None = None,
+) -> dict[str, str]:
+    refresh_token = (
+        (body.refresh_token if body else None)
+        or request.cookies.get("refresh_token")
+    )
+    if refresh_token:
+        await revoke_refresh_token(session, refresh_token)
+
     response.delete_cookie(key="access_token")
     response.delete_cookie(key="refresh_token")
     return {"message": "Sessão encerrada com sucesso"}

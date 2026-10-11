@@ -175,3 +175,53 @@ async def test_project_created_triggers_webhook_delivery(
     assert deliveries["total"] == 1
     assert deliveries["items"][0]["status"] == "success"
     assert deliveries["items"][0]["response_status_code"] == 200
+
+
+@pytest.mark.asyncio
+async def test_webhook_ssrf_protection(client: AsyncClient) -> None:
+    """Valida bloqueio de SSRF ao cadastrar URLs de loopback, redes privadas ou metadados de nuvem."""
+    owner_email = f"wh_ssrf_{uuid.uuid4().hex[:6]}@softforge.com"
+    await client.post(
+        "/api/v1/auth/register",
+        json={"email": owner_email, "password": "Password123!", "full_name": "SSRF Tester"},
+    )
+    login_resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": owner_email, "password": "Password123!"},
+    )
+    headers = {"Authorization": f"Bearer {login_resp.json()['access_token']}"}
+
+    ws_resp = await client.post(
+        "/api/v1/workspaces",
+        json={"name": "SSRF Workspace", "slug": f"ssrf-ws-{uuid.uuid4().hex[:6]}"},
+        headers=headers,
+    )
+    workspace_id = ws_resp.json()["id"]
+
+    # 1. Tentativa com localhost deve retornar 400
+    resp_local = await client.post(
+        f"/api/v1/workspaces/{workspace_id}/webhooks",
+        json={"url": "http://localhost:8000/internal"},
+        headers=headers,
+    )
+    assert resp_local.status_code == 400
+    assert "SSRF" in resp_local.json()["message"]
+
+    # 2. Tentativa com IP loopback 127.0.0.1 deve retornar 400
+    resp_loopback = await client.post(
+        f"/api/v1/workspaces/{workspace_id}/webhooks",
+        json={"url": "http://127.0.0.1:8000/admin"},
+        headers=headers,
+    )
+    assert resp_loopback.status_code == 400
+    assert "SSRF" in resp_loopback.json()["message"]
+
+    # 3. Tentativa com AWS metadata IP 169.254.169.254 deve retornar 400
+    resp_metadata = await client.post(
+        f"/api/v1/workspaces/{workspace_id}/webhooks",
+        json={"url": "http://169.254.169.254/latest/meta-data"},
+        headers=headers,
+    )
+    assert resp_metadata.status_code == 400
+    assert "SSRF" in resp_metadata.json()["message"]
+

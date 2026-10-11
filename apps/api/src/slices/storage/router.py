@@ -183,6 +183,9 @@ async def download_file(
             res = await session.execute(membership_stmt)
             if not res.scalar_one_or_none():
                 raise ForbiddenException(message="Você não possui autorização para baixar este arquivo.")
+        else:
+            if file.uploaded_by_user_id != current_user.id:
+                raise ForbiddenException(message="Você não possui autorização para baixar este arquivo pessoal.")
 
     data = read_bytes(file.storage_path)
     return Response(

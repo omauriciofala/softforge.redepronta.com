@@ -56,3 +56,22 @@ class RequestContextMiddleware(BaseHTTPMiddleware):
         )
 
         return response
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """
+    Middleware responsável por injetar cabeçalhos defensivos padrão em todas as respostas HTTP (OWASP API8):
+    - X-Content-Type-Options: Previne MIME-sniffing
+    - X-Frame-Options: Previne Clickjacking (DENY)
+    - Referrer-Policy: Previne vazamento de URLs internas em requisições cross-origin
+    - Permissions-Policy: Desativa APIs desnecessárias no navegador (câmera, microfone, geolocalização)
+    """
+
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:  # type: ignore[type-arg]
+        response: Response = await call_next(request)
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"] = "geolocation=(), camera=(), microphone=()"
+        return response
+

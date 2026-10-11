@@ -9,6 +9,7 @@ from src.core.errors import NotFoundException
 from src.core.queue import get_queue
 from src.slices.webhooks.models import WebhookDelivery, WebhookEndpoint
 from src.slices.webhooks.schemas import WebhookEndpointCreate, WebhookEndpointUpdate
+from src.slices.webhooks.security import validate_webhook_url
 
 
 async def create_webhook_endpoint(
@@ -17,6 +18,7 @@ async def create_webhook_endpoint(
     req: WebhookEndpointCreate,
 ) -> WebhookEndpoint:
     """Cadastra um novo webhook para o workspace gerando segredo HMAC exclusivo."""
+    validate_webhook_url(req.url)
     endpoint = WebhookEndpoint(
         workspace_id=workspace_id,
         url=req.url,
@@ -72,6 +74,7 @@ async def update_webhook_endpoint(
     endpoint = await get_webhook_endpoint(session, endpoint_id, workspace_id)
 
     if req.url is not None:
+        validate_webhook_url(req.url)
         endpoint.url = req.url
     if req.description is not None:
         endpoint.description = req.description

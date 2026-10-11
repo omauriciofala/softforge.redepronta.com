@@ -11,6 +11,11 @@ async def test_healthcheck(client: AsyncClient) -> None:
     data = response.json()
     assert data["status"] == "healthy"
     assert "version" in data
+    # Valida injeção defensiva dos cabeçalhos de segurança (OWASP API8)
+    assert response.headers["x-content-type-options"] == "nosniff"
+    assert response.headers["x-frame-options"] == "DENY"
+    assert response.headers["referrer-policy"] == "strict-origin-when-cross-origin"
+    assert response.headers["permissions-policy"] == "geolocation=(), camera=(), microphone=()"
 
 
 @pytest.mark.asyncio
@@ -132,3 +137,45 @@ async def test_oauth_callback_and_account_linking(client: AsyncClient) -> None:
         assert link_data["user"]["email"] == existing_email
     finally:
         GoogleOAuthProvider.exchange_code = original_exchange  # type: ignore
+
+
+@pytest.mark.asyncio
+async def test_logout_revokes_refresh_token(client: AsyncClient) -> None:
+    """Valida revogação real no servidor do refresh token ao realizar logout (OWASP API2)."""
+    email = "revoketest@softforge.com"
+    await client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "Password123!", "full_name": "Revoke Tester"},
+    )
+    login_resp = await client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": "Password123!"},
+    )
+    assert login_resp.status_code == 200
+    tokens = login_resp.json()
+    refresh_token = tokens["refresh_token"]
+
+    # 1. Renovação funciona normalmente antes do logout
+    ref_resp = await client.post(
+        "/api/v1/auth/refresh",
+        json={"refresh_token": refresh_token},
+    )
+    assert ref_resp.status_code == 200
+    new_tokens = ref_resp.json()
+    new_refresh_token = new_tokens["refresh_token"]
+
+    # 2. Executa logout passando o refresh token
+    logout_resp = await client.post(
+        "/api/v1/auth/logout",
+        json={"refresh_token": new_refresh_token},
+    )
+    assert logout_resp.status_code == 200
+
+    # 3. Tentativa de reutilizar o refresh token após logout DEVE retornar 401
+    invalid_ref_resp = await client.post(
+        "/api/v1/auth/refresh",
+        json={"refresh_token": new_refresh_token},
+    )
+    assert invalid_ref_resp.status_code == 401
+    assert "revogada" in invalid_ref_resp.json()["message"].lower()
+

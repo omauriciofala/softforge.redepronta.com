@@ -27,7 +27,12 @@ def get_local_storage_root() -> Path:
 def save_bytes(storage_path: str, data: bytes) -> None:
     """Persiste os bytes no backend configurado (padrão local em dev/testes)."""
     root = get_local_storage_root()
-    target = root / storage_path
+    target = (root / storage_path).resolve()
+    if not target.is_relative_to(root):
+        raise AppException(
+            message="Tentativa de acesso a caminho inválido no storage (Path Traversal protection).",
+            status_code=400,
+        )
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_bytes(data)
 
@@ -35,7 +40,12 @@ def save_bytes(storage_path: str, data: bytes) -> None:
 def read_bytes(storage_path: str) -> bytes:
     """Lê os bytes do arquivo a partir do storage."""
     root = get_local_storage_root()
-    target = root / storage_path
+    target = (root / storage_path).resolve()
+    if not target.is_relative_to(root):
+        raise AppException(
+            message="Tentativa de acesso a caminho inválido no storage (Path Traversal protection).",
+            status_code=400,
+        )
     if not target.exists():
         raise NotFoundException(message="Arquivo físico não encontrado no storage.")
     return target.read_bytes()
@@ -44,7 +54,12 @@ def read_bytes(storage_path: str) -> bytes:
 def delete_bytes(storage_path: str) -> None:
     """Remove os bytes físicos do arquivo do storage."""
     root = get_local_storage_root()
-    target = root / storage_path
+    target = (root / storage_path).resolve()
+    if not target.is_relative_to(root):
+        raise AppException(
+            message="Tentativa de acesso a caminho inválido no storage (Path Traversal protection).",
+            status_code=400,
+        )
     if target.exists():
         target.unlink()
 

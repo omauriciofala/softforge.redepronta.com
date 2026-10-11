@@ -11,7 +11,7 @@ from src.core.database import engine
 from src.core.errors import register_exception_handlers
 from src.core.i18n import DEFAULT_LOCALE, SUPPORTED_LOCALES, get_translations_catalog, t
 from src.core.logging import logger, setup_logging
-from src.core.middleware import RequestContextMiddleware
+from src.core.middleware import RequestContextMiddleware, SecurityHeadersMiddleware
 from src.core.queue import close_queue_pool, init_queue_pool
 from src.core.ratelimit import check_rate_limit, get_client_ip
 from src.slices.apikeys.router import router as apikeys_router
@@ -60,6 +60,7 @@ app = FastAPI(
 
 # Registra handlers de erro e middleware de correlação
 register_exception_handlers(app)
+app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(RequestContextMiddleware)
 
 # Configuração de CORS

@@ -107,7 +107,7 @@ async def dispatch_webhook_task(
     from sqlalchemy import select
 
     from src.slices.webhooks.models import WebhookDelivery, WebhookEndpoint
-    from src.slices.webhooks.security import generate_webhook_signature
+    from src.slices.webhooks.security import generate_webhook_signature, validate_webhook_url
 
     session_maker = ctx.get("session_maker", AsyncSessionLocal)
     async with session_maker() as session:
@@ -155,6 +155,7 @@ async def dispatch_webhook_task(
             return {"status": "success", "delivery_id": delivery_id}
 
         try:
+            validate_webhook_url(endpoint.url)
             async with httpx.AsyncClient(timeout=10.0) as http_client:
                 response = await http_client.post(endpoint.url, json=delivery.payload, headers=headers)
                 delivery.response_status_code = response.status_code
