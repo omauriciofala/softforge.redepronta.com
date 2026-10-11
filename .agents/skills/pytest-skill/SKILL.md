@@ -1,201 +1,136 @@
 ---
 name: pytest-skill
-description: 'Generates production-grade pytest tests in Python with fixtures, parametrize, markers, mocking, and conftest patterns. Use when user mentions "pytest", "conftest", "@pytest.fixture", "@pytest.mark", "Python test". Triggers on: "pytest", "conftest", "Python test", "parametrize", "Python...'
-risk: unknown
-source: https://github.com/LambdaTest/agent-skills/tree/main/pytest-skill
-source_repo: LambdaTest/agent-skills
-source_type: community
-date_added: 2026-07-01
-license: MIT
-license_source: https://github.com/LambdaTest/agent-skills/blob/main/LICENSE
+description: "Padrão oficial de testes automatizados para o SoftForge: testes assíncronos de Vertical Slices com httpx.AsyncClient, fixtures de autenticação JWT, validação de RBAC/multi-tenancy e integração com verify.py."
+risk: safe
+source: community-adapted-fastapi
+date_added: "2026-10-11"
 ---
 
-# Pytest Testing Skill
-## When to Use
+# FastAPI Slice Testing with Pytest (SoftForge)
 
-Use this skill when you need generates production-grade pytest tests in Python with fixtures, parametrize, markers, mocking, and conftest patterns. Use when user mentions "pytest", "conftest", "@pytest.fixture", "@pytest.mark", "Python test". Triggers on: "pytest", "conftest", "Python test", "parametrize", "Python...
+Guia definitivo de testes automatizados para as fatias verticais do SoftForge em `apps/api/src/slices/`.
 
+---
 
-## Core Patterns
+## 1. Princípios Inegociáveis
 
-### Basic Test
+1. **Testes Obrigatórios por Fatia:** Toda nova fatia ou rota deve conter sua suíte de testes em `apps/api/src/slices/<feature>/tests/test_<feature>_slice.py`.
+2. **Nenhuma Alteração sem 100% de Aprovação:** Os testes devem ser executados localmente e validados pelo guardrail:
+   ```bash
+   python tools/scripts/verify.py
+   ```
+3. **Testes Ponta-a-Ponta de Negócio:** Em vez de mockar internamente toda camada de banco, os testes do SoftForge exercitam o ciclo de vida completo da API usando o cliente HTTP assíncrono oficial.
+
+---
+
+## 2. Estrutura Padrão de Teste de Fatia
+
+Todo teste deve utilizar a fixture `client: AsyncClient` e rodar sobre `@pytest.mark.asyncio`:
 
 ```python
+import uuid
 import pytest
+from httpx import AsyncClient
 
-def test_addition():
-    assert 2 + 3 == 5
+@pytest.mark.asyncio
+async def test_feature_lifecycle_and_rbac(client: AsyncClient) -> None:
+    """Valida o ciclo de vida completo da fatia, incluindo autenticação e controle de acesso."""
+    
+    # 1. Cria usuário de teste com e-mail único
+    email = f"user_{uuid.uuid4().hex[:6]}@example.com"
+    reg_res = await client.post(
+        "/api/v1/auth/register",
+        json={"email": email, "password": "Password123!", "full_name": "Test User"},
+    )
+    assert reg_res.status_code == 201
 
-def test_exception():
-    with pytest.raises(ValueError, match="invalid"):
-        int("not_a_number")
+    # 2. Faz login e obtém token JWT
+    login_res = await client.post(
+        "/api/v1/auth/login",
+        json={"email": email, "password": "Password123!"},
+    )
+    assert login_res.status_code == 200
+    token = login_res.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
 
-class TestCalculator:
-    def test_add(self):
-        calc = Calculator()
-        assert calc.add(2, 3) == 5
+    # 3. Executa a operação principal da fatia
+    create_res = await client.post(
+        "/api/v1/my-feature/items",
+        json={"name": "Item Teste", "value": 100},
+        headers=headers,
+    )
+    assert create_res.status_code == 201
+    item_id = create_res.json()["id"]
 
-    def test_divide_by_zero(self):
-        with pytest.raises(ZeroDivisionError):
-            Calculator().divide(10, 0)
+    # 4. Consulta e valida os dados retornados
+    get_res = await client.get(f"/api/v1/my-feature/items/{item_id}", headers=headers)
+    assert get_res.status_code == 200
+    assert get_res.json()["name"] == "Item Teste"
 ```
 
-### Fixtures
+---
+
+## 3. Padrão de Testes de RBAC e Isolamento Multi-Tenant
+
+Sempre que a fatia pertencer ou interagir com workspaces, deve-se testar a segregação de permissões:
 
 ```python
-@pytest.fixture
-def calculator():
-    return Calculator()
+@pytest.mark.asyncio
+async def test_tenant_isolation_forbidden(client: AsyncClient) -> None:
+    """Garante que usuários de outros workspaces recebam 403 Forbidden ao tentar acessar dados alheios."""
+    
+    # Usuário A cria recurso
+    headers_a = await create_authenticated_user(client, "user_a@test.com")
+    item_a = (await client.post("/api/v1/items", json={"title": "Doc A"}, headers=headers_a)).json()
 
-@pytest.fixture
-def db_connection():
-    conn = Database.connect("test_db")
-    yield conn  # teardown after yield
-    conn.rollback()
-    conn.close()
-
-@pytest.fixture(scope="module")
-def api_client():
-    client = APIClient(base_url="http://localhost:8000")
-    yield client
-    client.logout()
-
-# conftest.py - shared fixtures
-@pytest.fixture(autouse=True)
-def reset_state():
-    State.reset()
-    yield
-    State.cleanup()
-
-# Usage
-def test_add(calculator):
-    assert calculator.add(2, 3) == 5
+    # Usuário B tenta acessar recurso do Usuário A
+    headers_b = await create_authenticated_user(client, "user_b@test.com")
+    forbidden_res = await client.get(f"/api/v1/items/{item_a['id']}", headers=headers_b)
+    
+    assert forbidden_res.status_code in (403, 404)
 ```
 
-### Parametrize
+---
+
+## 4. Testes Parametrizados de Validação de Input (422)
+
+Use `@pytest.mark.parametrize` para testar limites de esquemas Pydantic e evitar repetição de código:
 
 ```python
-@pytest.mark.parametrize("input,expected", [
-    ("hello", 5), ("", 0), ("pytest", 6),
-])
-def test_string_length(input, expected):
-    assert len(input) == expected
-
-@pytest.mark.parametrize("a,b,expected", [
-    (2, 3, 5), (-1, 1, 0), (0, 0, 0),
-])
-def test_add(calculator, a, b, expected):
-    assert calculator.add(a, b) == expected
+@pytest.mark.parametrize(
+    "invalid_payload,expected_status",
+    [
+        ({"email": "invalid-email", "password": "123"}, 422), # E-mail inválido
+        ({"email": "ok@test.com", "password": ""}, 422),       # Senha vazia
+        ({}, 422),                                             # Payload vazio
+    ],
+)
+@pytest.mark.asyncio
+async def test_validation_errors(client: AsyncClient, invalid_payload, expected_status) -> None:
+    res = await client.post("/api/v1/auth/register", json=invalid_payload)
+    assert res.status_code == expected_status
 ```
 
-### Markers
+---
 
-```python
-@pytest.mark.slow
-def test_large_dataset(): ...
+## 5. Como Executar os Testes
 
-@pytest.mark.skip(reason="Not implemented")
-def test_future_feature(): ...
+```bash
+# Testar uma fatia específica rapidamente:
+apps/api/.venv/Scripts/pytest.exe apps/api/src/slices/workspaces/tests/
 
-@pytest.mark.skipif(sys.platform == "win32", reason="Unix only")
-def test_unix_permissions(): ...
+# Testar todas as fatias com relatório resumido:
+apps/api/.venv/Scripts/pytest.exe apps/api/src/slices/ -q
 
-@pytest.mark.xfail(reason="Known bug #123")
-def test_known_bug(): ...
+# Executar a verificação mestre do projeto (Testes + Linter + Alembic):
+apps/api/.venv/Scripts/python.exe tools/scripts/verify.py
 ```
 
-### Mocking
+---
 
-```python
-from unittest.mock import patch, MagicMock
+## 6. Checklist de Qualidade de Testes
 
-def test_send_email(mocker):
-    mock_smtp = mocker.patch("myapp.email.smtplib.SMTP")
-    send_welcome_email("user@test.com")
-    mock_smtp.return_value.sendmail.assert_called_once()
-
-def test_api_call(mocker):
-    mock_response = mocker.Mock()
-    mock_response.status_code = 200
-    mock_response.json.return_value = {"users": [{"name": "Alice"}]}
-    mocker.patch("myapp.service.requests.get", return_value=mock_response)
-    users = get_users()
-    assert len(users) == 1
-
-@patch("myapp.service.database")
-def test_save_user(mock_db):
-    mock_db.save.return_value = True
-    assert save_user({"name": "Alice"}) is True
-    mock_db.save.assert_called_once()
-```
-
-### Assertions
-
-```python
-assert x == y
-assert x != y
-assert x in collection
-assert isinstance(obj, MyClass)
-assert 0.1 + 0.2 == pytest.approx(0.3)
-
-with pytest.raises(ValueError) as exc_info:
-    raise ValueError("bad")
-assert "bad" in str(exc_info.value)
-```
-
-### Anti-Patterns
-
-| Bad | Good | Why |
-|-----|------|-----|
-| `self.assertEqual()` | `assert x == y` | pytest rewrites give better output |
-| Setup in `__init__` | `@pytest.fixture` | Lifecycle management |
-| Global state | Fixture with `yield` | Proper cleanup |
-| Huge test functions | Small focused tests | Easier debugging |
-
-## Quick Reference
-
-| Task | Command |
-|------|---------|
-| Run all | `pytest` |
-| Run file | `pytest tests/test_login.py` |
-| Run specific | `pytest tests/test_login.py::test_login_success` |
-| By marker | `pytest -m slow` |
-| By keyword | `pytest -k "login and not invalid"` |
-| Verbose | `pytest -v` |
-| Stop first fail | `pytest -x` |
-| Last failed | `pytest --lf` |
-| Coverage | `pytest --cov=myapp --cov-report=html` |
-| Parallel | `pytest -n auto` (pytest-xdist) |
-
-## pyproject.toml
-
-```toml
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-markers = ["slow: slow tests", "integration: integration tests"]
-addopts = "-v --tb=short"
-```
-
-## Deep Patterns
-
-For production-grade patterns, see `reference/playbook.md`:
-
-| Section | What's Inside |
-|---------|--------------|
-| §1 Config | pytest.ini + pyproject.toml with markers, coverage |
-| §2 Fixtures | Scoping, factories, teardown, autouse, tmp_path |
-| §3 Parametrize | Basic, with IDs, cartesian, indirect |
-| §4 Mocking | pytest-mock, monkeypatch, spies, env vars |
-| §5 Async | pytest-asyncio, async fixtures, async client |
-| §6 Exceptions | pytest.raises(match=), warnings |
-| §7 Markers & Plugins | Custom markers, collection hooks |
-| §8 Class-Based | Nested classes, autouse setup |
-| §9 CI/CD | GitHub Actions matrix, coverage gates |
-| §10 Debugging Table | 10 common problems with fixes |
-| §11 Best Practices | 15-item production checklist |
-
-## Limitations
-
-- Use this skill only when the task clearly matches its upstream source and local project context.
-- Verify commands, generated code, dependencies, credentials, and external service behavior before applying changes.
-- Do not treat examples as a substitute for environment-specific tests, security review, or user approval for destructive or costly actions.
+- [ ] O teste cria seus próprios dados únicos (`uuid.uuid4().hex`) sem depender de ordem de execução?
+- [ ] O teste valida o status code esperado e o schema do JSON retornado?
+- [ ] O teste valida cenários negativos (`401 Unauthorized`, `403 Forbidden`, `422 Unprocessable Entity`)?
+- [ ] Todos os 37+ testes existentes continuam passando com `pytest apps/api/src/slices/`?
