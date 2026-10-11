@@ -39,6 +39,7 @@ Todo agente operando no SoftForge deve consultar e aplicar as habilidades especi
 - **[karpathy-guidelines](.agents/skills/karpathy-guidelines/SKILL.md):** Princípios de simplicidade, modificação cirúrgica e verificação estrita.
 - **[dev-tasks](.agents/skills/dev-tasks/SKILL.md):** Gestão autônoma de tarefas técnicas, critérios de aceite e servidor MCP sobre `stdio`.
 - **[api-security-best-practices](.agents/skills/api-security-best-practices/SKILL.md):** Padrões essenciais de segurança para APIs (OWASP API Top 10, autenticação JWT robusta, isolamento multi-tenant RBAC, validação estrita Pydantic e rate limiting).
+- **[react-vite-best-practices](.agents/skills/react-vite-best-practices/SKILL.md):** Otimização de performance, eliminação de waterfalls, renderização segura e boas práticas para o frontend React 18 SPA com Vite e TanStack Query.
 
 ---
 
